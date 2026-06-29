@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const heartCount = Math.max(4, Math.floor(safeInt(cfg.heartCount, 20) * 0.2));
+    const heartCount = Math.min(3, Math.max(0, Math.floor(safeInt(cfg.heartCount, 3) * 0.3)));
     const hearts = Array.from({ length: heartCount }, () => new HeartParticle());
 
     class ShootingStar {
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (envelopeOpen || typewriterRunning) return;
         envelope.classList.add('open');
         envelopeOpen = true;
-        startTypewriter(letterParagraphs, letterBody, 40);
+        startTypewriter(letterParagraphs, letterBody, 55);
     }
 
     if (envelope) {
@@ -574,8 +574,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function burstHearts(x, y) {
-        const count = 10 + Math.floor(Math.random() * 8);
-        const symbols = ['❤️', '💖', '💕', '✨'];
+        const count = 3 + Math.floor(Math.random() * 4);
+        const symbols = ['❤️', '🤍'];
         for (let i = 0; i < count; i++) {
             const el = document.createElement('span');
             el.className = 'heart-particle';
@@ -693,11 +693,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 obs.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
     revealEls.forEach(el => obs.observe(el));
 
     // =============================================
-    // 9. HERO PARALLAX
+    // 9. HERO PARALLAX (subtle)
     // =============================================
     let ticking = false;
     window.addEventListener('scroll', () => {
@@ -709,8 +709,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const content = qs('.hero-content');
                     if (content) {
                         const pct = sy / heroSection.offsetHeight;
-                        content.style.transform = `translateY(${pct * 50}px)`;
-                        content.style.opacity = 1 - pct * 0.5;
+                        content.style.transform = `translateY(${pct * 30}px)`;
+                        content.style.opacity = 1 - pct * 0.4;
                     }
                 }
                 ticking = false;
@@ -720,32 +720,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =============================================
-    // 10. FLOATING DECORATIVE (reduced by 80%)
+    // 10. FLOATING DECORATIVE (minimal)
     // =============================================
     const floatingContainer = $('floating-elements');
     if (floatingContainer) {
-        const fhCount = Math.max(3, Math.floor(safeInt(cfg.floatingHearts, 15) * 0.2));
-        const frCount = safeInt(cfg.floatingRoses, 6);
+        const fhCount = Math.min(2, Math.max(1, safeInt(cfg.floatingHearts, 3)));
+        const frCount = Math.min(1, safeInt(cfg.floatingRoses, 1));
 
         for (let i = 0; i < fhCount; i++) {
             const el = document.createElement('span');
             el.className = 'floating-heart';
-            el.textContent = Math.random() > 0.5 ? '❤️' : '💖';
-            el.style.left = Math.random() * 94 + '%';
-            el.style.fontSize = (10 + Math.random() * 18) + 'px';
-            el.style.animationDuration = (12 + Math.random() * 18) + 's';
-            el.style.animationDelay = (Math.random() * 15) + 's';
+            el.textContent = '🤍';
+            el.style.left = (20 + i * 50) + '%';
+            el.style.fontSize = '14px';
+            el.style.animationDuration = (25 + i * 10) + 's';
+            el.style.animationDelay = (i * 8) + 's';
             floatingContainer.appendChild(el);
         }
 
         for (let i = 0; i < frCount; i++) {
             const el = document.createElement('span');
             el.className = 'floating-rose';
-            el.textContent = i % 2 === 0 ? '🌹' : '🤍';
-            el.style.left = Math.random() * 94 + '%';
-            el.style.fontSize = (14 + Math.random() * 16) + 'px';
-            el.style.animationDuration = (14 + Math.random() * 18) + 's';
-            el.style.animationDelay = (Math.random() * 15) + 's';
+            el.textContent = '🤍';
+            el.style.left = '50%';
+            el.style.fontSize = '16px';
+            el.style.animationDuration = '30s';
+            el.style.animationDelay = '4s';
             floatingContainer.appendChild(el);
         }
     }

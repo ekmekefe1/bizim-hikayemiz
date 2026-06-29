@@ -128,15 +128,15 @@
         {% endif %}
         <canvas id="starfield" role="presentation" aria-hidden="true"></canvas>
         <div class="hero-overlay" aria-hidden="true"></div>
-        <div class="hero-content" id="heroContent">
-            <div class="hero-badge">{{ content.hero_badge if content and content.hero_badge else '❤️' }}</div>
-            <h1 class="hero-title">{{ content.title if content else 'Cerenim' }}</h1>
-            <p class="hero-subtitle">{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}</p>
-            <div class="hero-scroll">
-                <span>Keşfet</span>
-                <div class="scroll-arrow" aria-hidden="true">↓</div>
+            <div class="hero-content" id="heroContent">
+                <div class="hero-badge">{{ content.hero_badge if content and content.hero_badge else '❤️' }}</div>
+                <h1 class="hero-title">{{ content.title if content else 'Cerenim' }}</h1>
+                <p class="hero-subtitle">{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}</p>
+                <div class="hero-scroll">
+                    <span>Aşağı kaydır</span>
+                    <div class="scroll-arrow" aria-hidden="true">↓</div>
+                </div>
             </div>
-        </div>
     </section>
 
     <!-- ==================== COUNTER ==================== -->
@@ -298,11 +298,11 @@
 
     <script>
         window.__ANIM_CONFIG__ = {
-            starCount: {{ anim_settings.get('animation_star_count', '4000') }},
-            heartCount: {{ anim_settings.get('animation_heart_count', '20') }},
-            shootingStarCount: {{ anim_settings.get('animation_shooting_star_count', '4') }},
-            floatingHearts: {{ anim_settings.get('animation_floating_hearts', '15') }},
-            floatingRoses: {{ anim_settings.get('animation_floating_roses', '6') }}
+            starCount: {{ anim_settings.get('animation_star_count', '1200') }},
+            heartCount: {{ anim_settings.get('animation_heart_count', '3') }},
+            shootingStarCount: {{ anim_settings.get('animation_shooting_star_count', '2') }},
+            floatingHearts: {{ anim_settings.get('animation_floating_hearts', '3') }},
+            floatingRoses: {{ anim_settings.get('animation_floating_roses', '1') }}
         };
     </script>
     <script src="/static/js/script.js?v=3"></script>
