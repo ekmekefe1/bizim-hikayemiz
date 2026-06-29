@@ -115,7 +115,7 @@ class Photo(db.Model):
             'filename': self.filename,
             'caption': self.caption,
             'order': self.order,
-            'url': '/static/uploads/photos/' + self.filename,
+            'url': '/uploads/photos/' + self.filename,
         }
 
     def __repr__(self):
@@ -135,7 +135,7 @@ class MusicTrack(db.Model):
             'id': self.id,
             'filename': self.filename,
             'title': self.title or self.filename,
-            'url': '/static/uploads/music/' + self.filename,
+            'url': '/uploads/music/' + self.filename,
         }
 
     def __repr__(self):

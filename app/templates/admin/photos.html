@@ -19,7 +19,7 @@
 <div class="photo-grid">
     {% for photo in photos %}
     <div class="photo-item">
-        <img src="{{ url_for('static', filename='uploads/photos/' + photo.filename) }}" alt="{{ photo.caption or photo.filename }}">
+        <img src="{{ url_for('main.uploaded_file', filename='photos/' + photo.filename) }}" alt="{{ photo.caption or photo.filename }}">
         <div class="photo-info">
             <span class="photo-caption">{{ photo.caption or 'Açıklama yok' }}</span>
             <form method="POST" action="{{ url_for('admin.photo_delete', id=photo.id) }}">

@@ -38,11 +38,11 @@ def index():
 
     night_sky_url = None
     if content and content.night_sky_image:
-        night_sky_url = '/static/uploads/night_sky/' + content.night_sky_image
+        night_sky_url = '/uploads/night_sky/' + content.night_sky_image
 
     hero_background_url = None
     if content and content.hero_background:
-        hero_background_url = '/static/uploads/hero/' + content.hero_background
+        hero_background_url = '/uploads/hero/' + content.hero_background
 
     love_letter_paragraphs = []
     if content and content.love_letter:
@@ -139,7 +139,7 @@ def api_night_sky():
     try:
         content = SiteContent.query.first()
         if content and content.night_sky_image:
-            return jsonify({'url': '/static/uploads/night_sky/' + content.night_sky_image})
+            return jsonify({'url': '/uploads/night_sky/' + content.night_sky_image})
         return jsonify({'url': None})
     except Exception as e:
         logger.error(f'Error in api_night_sky: {e}')
@@ -148,6 +148,6 @@ def api_night_sky():
 @main_bp.route('/uploads/<path:filename>')
 def uploaded_file(filename):
     return send_from_directory(
-        os.path.join(current_app.root_path, '..', 'static', 'uploads'),
+        current_app.config['UPLOAD_FOLDER'],
         filename
     )

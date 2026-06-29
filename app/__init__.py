@@ -17,7 +17,7 @@ def create_app(config_class=Config):
     )
     app.config.from_object(config_class)
 
-    _ensure_directories(root_dir)
+    _ensure_directories(root_dir, app.config['UPLOAD_FOLDER'])
 
     if not app.debug and not app.testing:
         logs_dir = root_dir / 'logs'
@@ -93,15 +93,12 @@ def _migrate_schema():
     except Exception:
         pass
 
-def _ensure_directories(root_dir):
+def _ensure_directories(root_dir, upload_folder):
     dirs = [
         root_dir / 'instance',
-        root_dir / 'static' / 'uploads',
-        root_dir / 'static' / 'uploads' / 'photos',
-        root_dir / 'static' / 'uploads' / 'music',
-        root_dir / 'static' / 'uploads' / 'night_sky',
-        root_dir / 'static' / 'uploads' / 'hero',
     ]
+    for sub in ['', 'photos', 'music', 'night_sky', 'hero']:
+        dirs.append(Path(upload_folder) / sub)
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)
 
@@ -132,11 +129,11 @@ def _create_default_settings():
         'theme_secondary_color': '#ff6b6b',
         'theme_background_color': '#060612',
         'theme_text_color': '#f0f0f0',
-        'animation_star_count': '4000',
-        'animation_heart_count': '20',
-        'animation_shooting_star_count': '4',
-        'animation_floating_hearts': '15',
-        'animation_floating_roses': '6',
+        'animation_star_count': '1200',
+        'animation_heart_count': '3',
+        'animation_shooting_star_count': '2',
+        'animation_floating_hearts': '3',
+        'animation_floating_roses': '1',
         'animation_parallax': 'true',
         'animation_scroll_reveal': 'true',
     }
