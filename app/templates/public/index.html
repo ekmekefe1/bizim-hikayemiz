@@ -66,6 +66,9 @@
 
     <!-- ==================== HERO ==================== -->
     <section id="hero" aria-label="Kahraman bölümü">
+        {% if hero_background_url %}
+        <div class="hero-bg-wrapper" style="background-image: url('{{ hero_background_url }}')" aria-hidden="true"></div>
+        {% endif %}
         <canvas id="starfield" role="presentation" aria-hidden="true"></canvas>
         <div class="hero-overlay" aria-hidden="true"></div>
         <div class="hero-content">

@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Hero Görseli{% endblock %}
+{% block content %}
+<div class="night-sky-preview">
+    <h3>Mevcut Görsel</h3>
+    {% if content and content.hero_background %}
+    <img src="{{ url_for('static', filename='uploads/hero/' + content.hero_background) }}" alt="Hero Arkaplan" class="preview-image">
+    <form method="POST" action="{{ url_for('admin.hero_background_delete') }}" style="margin-top:12px;">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Görseli kaldırmak istediğinize emin misiniz?')">Görseli Kaldır</button>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <span class="empty-icon">🖼️</span>
+        <p>Henüz hero görseli yüklenmemiş.</p>
+        <p class="empty-hint">Yüklediğiniz görsel, hero bölümünde canvas animasyonunun arkasında tam ekran gösterilecektir.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="form-section" style="margin-top:30px;">
+    <h3>Yeni Görsel Yükle</h3>
+    <form method="POST" class="admin-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="hero_background">Görsel Seç (JPG, PNG, WEBP)</label>
+            <input type="file" name="hero_background" id="hero_background" class="form-input" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Yükle</button>
+    </form>
+</div>
+{% endblock %}

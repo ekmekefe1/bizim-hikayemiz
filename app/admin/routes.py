@@ -355,6 +355,51 @@ def night_sky_delete():
         logger.info(f'Night sky image deleted by {current_user.username}')
     return redirect(url_for('admin.night_sky'))
 
+# ---- Hero Background ----
+
+@admin_bp.route('/hero-background', methods=['GET', 'POST'])
+@login_required
+def hero_background():
+    sc = SiteContent.query.first()
+    if not sc:
+        sc = SiteContent()
+        db.session.add(sc)
+        db.session.commit()
+
+    if request.method == 'POST' and 'hero_background' in request.files:
+        file = request.files['hero_background']
+        if file and file.filename:
+            if validate_file_content(file, current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', PHOTO_EXTENSIONS)):
+                filename = secure_filename(f"hero_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.', 1)[1].lower()}")
+                upload_dir = ensure_upload_dir('hero')
+                filepath = os.path.join(upload_dir, filename)
+                file.save(filepath)
+                sc.hero_background = filename
+                db.session.commit()
+                flash('Hero görseli yüklendi.', 'success')
+                logger.info(f'Hero background uploaded by {current_user.username}: {filename}')
+            else:
+                flash('Geçersiz dosya türü.', 'error')
+        else:
+            flash('Dosya seçilmedi.', 'error')
+        return redirect(url_for('admin.hero_background'))
+
+    return render_template('admin/hero_background.html', content=sc)
+
+@admin_bp.route('/hero-background/delete', methods=['POST'])
+@login_required
+def hero_background_delete():
+    sc = SiteContent.query.first()
+    if sc and sc.hero_background:
+        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'hero', sc.hero_background)
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        sc.hero_background = None
+        db.session.commit()
+        flash('Hero görseli kaldırıldı.', 'info')
+        logger.info(f'Hero background deleted by {current_user.username}')
+    return redirect(url_for('admin.hero_background'))
+
 # ---- Settings ----
 
 @admin_bp.route('/settings', methods=['GET', 'POST'])

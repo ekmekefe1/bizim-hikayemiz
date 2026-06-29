@@ -340,6 +340,21 @@ h1, h2, h3 {
     justify-content: center;
 }
 
+.hero-bg-wrapper {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.hero-bg-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
 #starfield {
     position: absolute;
     top: 0;

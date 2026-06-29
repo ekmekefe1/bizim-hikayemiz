@@ -37,6 +37,7 @@ class SiteContent(db.Model):
     night_sky_title = db.Column(db.String(200), default='23 Ocak 2023')
     night_sky_subtitle = db.Column(db.String(300), default='O gece gökyüzü bize gülümsüyordu...')
     night_sky_text = db.Column(db.Text, default='Yıldızların en parlak olduğu gecede...')
+    hero_background = db.Column(db.String(200), nullable=True)
     night_sky_image = db.Column(db.String(200), nullable=True)
     music_file = db.Column(db.String(200), nullable=True)
     timeline_title = db.Column(db.String(200), default='Zaman Tüneli')

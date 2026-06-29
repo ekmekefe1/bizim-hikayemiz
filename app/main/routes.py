@@ -40,6 +40,10 @@ def index():
     if content and content.night_sky_image:
         night_sky_url = '/static/uploads/night_sky/' + content.night_sky_image
 
+    hero_background_url = None
+    if content and content.hero_background:
+        hero_background_url = '/static/uploads/hero/' + content.hero_background
+
     love_letter_paragraphs = []
     if content and content.love_letter:
         love_letter_paragraphs = [p.strip() for p in content.love_letter.split('\n') if p.strip()]
@@ -55,6 +59,7 @@ def index():
         months=months,
         days=days,
         night_sky_url=night_sky_url,
+        hero_background_url=hero_background_url,
         love_letter_paragraphs=love_letter_paragraphs,
     )
 

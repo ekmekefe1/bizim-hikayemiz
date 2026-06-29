@@ -75,11 +75,23 @@ def create_app(config_class=Config):
 
     with app.app_context():
         db.create_all()
+        _migrate_schema()
         _create_default_admin()
         _create_default_content()
         _create_default_settings()
 
     return app
+
+def _migrate_schema():
+    from app.models import SiteContent
+    import sqlalchemy as sa
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sa.text('ALTER TABLE site_content ADD COLUMN hero_background VARCHAR(200)'))
+            conn.commit()
+            app.logger.info('Added hero_background column to site_content')
+    except Exception:
+        pass
 
 def _ensure_directories(root_dir):
     dirs = [
@@ -88,6 +100,7 @@ def _ensure_directories(root_dir):
         root_dir / 'static' / 'uploads' / 'photos',
         root_dir / 'static' / 'uploads' / 'music',
         root_dir / 'static' / 'uploads' / 'night_sky',
+        root_dir / 'static' / 'uploads' / 'hero',
     ]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)

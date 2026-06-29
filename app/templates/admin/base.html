@@ -42,6 +42,10 @@
                     <span class="nav-icon">🎵</span>
                     <span>Müzik</span>
                 </a>
+                <a href="{{ url_for('admin.hero_background') }}" class="nav-item {% if request.endpoint == 'admin.hero_background' %}active{% endif %}">
+                    <span class="nav-icon">🖼️</span>
+                    <span>Hero Görseli</span>
+                </a>
                 <a href="{{ url_for('admin.night_sky') }}" class="nav-item {% if request.endpoint == 'admin.night_sky' %}active{% endif %}">
                     <span class="nav-icon">🌙</span>
                     <span>Gece Gökyüzü</span>
