@@ -2,6 +2,7 @@
 {% block page_title %}Müzik{% endblock %}
 {% block content %}
 <form method="POST" class="admin-form" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-row">
         <div class="form-group">
             <label for="music_file">Müzik Dosyası</label>
@@ -42,10 +43,12 @@
                 <td class="action-cell">
                     {% if not track.is_active %}
                     <form method="POST" action="{{ url_for('admin.music_activate', id=track.id) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-sm btn-primary">Aktifleştir</button>
                     </form>
                     {% endif %}
                     <form method="POST" action="{{ url_for('admin.music_delete', id=track.id) }}" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</button>
                     </form>
                 </td>

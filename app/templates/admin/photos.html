@@ -2,6 +2,7 @@
 {% block page_title %}Fotoğraflar{% endblock %}
 {% block content %}
 <form method="POST" class="admin-form" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="form-row">
         <div class="form-group">
             <label for="photo">Fotoğraf Seç</label>
@@ -22,6 +23,7 @@
         <div class="photo-info">
             <span class="photo-caption">{{ photo.caption or 'Açıklama yok' }}</span>
             <form method="POST" action="{{ url_for('admin.photo_delete', id=photo.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</button>
             </form>
         </div>
