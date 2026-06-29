@@ -13,6 +13,42 @@ document.addEventListener('DOMContentLoaded', () => {
     $('year').textContent = new Date().getFullYear();
 
     // =============================================
+    // 0. NAVBAR
+    // =============================================
+    const navbar = $('navbar');
+    const navbarToggle = $('navbarToggle');
+    const navbarLinks = $('navbarLinks');
+
+    navbarToggle.addEventListener('click', () => {
+        navbarToggle.classList.toggle('active');
+        navbarLinks.classList.toggle('open');
+        navbarToggle.setAttribute('aria-expanded', navbarLinks.classList.contains('open'));
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            navbarLinks.classList.remove('open');
+            navbarToggle.classList.remove('active');
+            navbarToggle.setAttribute('aria-expanded', 'false');
+        });
+    });
+
+    let ticking2 = false;
+    window.addEventListener('scroll', () => {
+        if (!ticking2) {
+            requestAnimationFrame(() => {
+                if (window.pageYOffset > 60) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+                ticking2 = false;
+            });
+            ticking2 = true;
+        }
+    });
+
+    // =============================================
     // 1. MUSIC MODAL + API
     // =============================================
     const musicModal = $('music-modal');
@@ -302,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const heartCount = safeInt(cfg.heartCount, 20);
+    const heartCount = Math.max(4, Math.floor(safeInt(cfg.heartCount, 20) * 0.2));
     const hearts = Array.from({ length: heartCount }, () => new HeartParticle());
 
     class ShootingStar {
@@ -684,11 +720,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // =============================================
-    // 10. FLOATING DECORATIVE
+    // 10. FLOATING DECORATIVE (reduced by 80%)
     // =============================================
     const floatingContainer = $('floating-elements');
     if (floatingContainer) {
-        const fhCount = safeInt(cfg.floatingHearts, 15);
+        const fhCount = Math.max(3, Math.floor(safeInt(cfg.floatingHearts, 15) * 0.2));
         const frCount = safeInt(cfg.floatingRoses, 6);
 
         for (let i = 0; i < fhCount; i++) {

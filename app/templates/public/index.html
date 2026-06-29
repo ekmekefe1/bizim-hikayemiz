@@ -11,7 +11,7 @@
     <meta name="theme-color" content="{{ theme_settings.get('theme_primary_color', '#e94560') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,500&family=Inter:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,500&family=Inter:wght@200;300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: {{ theme_settings.get('theme_primary_color', '#e94560') }};
@@ -20,7 +20,7 @@
             --text: {{ theme_settings.get('theme_text_color', '#f0f0f0') }};
         }
     </style>
-    <link rel="stylesheet" href="/static/css/style.css?v=1">
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
     <noscript>
         <style>
             .reveal { opacity: 1 !important; transform: none !important; }
@@ -31,6 +31,29 @@
 </head>
 <body>
     <div id="floating-elements" role="presentation" aria-hidden="true"></div>
+
+    <!-- ==================== NAVBAR ==================== -->
+    <nav id="navbar" class="navbar" role="navigation" aria-label="Ana navigasyon">
+        <div class="navbar-inner">
+            <a href="#hero" class="navbar-logo">
+                <span class="logo-heart" role="img" aria-label="kalp">❤️</span>
+                <span class="logo-text">Bizim Hikayemiz</span>
+            </a>
+            <div class="navbar-links" id="navbarLinks">
+                <a href="#counter" class="nav-link">Sayaç</a>
+                <a href="#night-sky" class="nav-link">Gece</a>
+                <a href="#timeline" class="nav-link">Zaman Tüneli</a>
+                <a href="#future" class="nav-link">Gelecek</a>
+                <a href="#gallery" class="nav-link">Galeri</a>
+                <a href="#love-letter" class="nav-link">Mektup</a>
+            </div>
+            <button class="navbar-toggle" id="navbarToggle" aria-label="Menüyü aç/kapat" aria-expanded="false">
+                <span class="toggle-bar"></span>
+                <span class="toggle-bar"></span>
+                <span class="toggle-bar"></span>
+            </button>
+        </div>
+    </nav>
 
     <!-- Music Modal -->
     <div id="music-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="music-modal-title">
@@ -73,11 +96,11 @@
         <div class="hero-overlay" aria-hidden="true"></div>
         <div class="hero-content">
             <div class="hero-badge">{{ content.hero_badge if content and content.hero_badge else '❤️' }}</div>
-            <h1 class="hero-title">{{ content.title if content else 'Cerenim' }} <span class="heart-pulse" role="img" aria-label="kalp">❤️</span></h1>
+            <h1 class="hero-title">{{ content.title if content else 'Cerenim' }}</h1>
             <p class="hero-subtitle">{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}</p>
             <div class="hero-timer" id="heroTimer">
                 <span class="hero-timer-label">{{ content.counter_title if content else 'Birlikteliğimiz' }}</span>
-                <span class="hero-timer-value" id="heroTimerValue">{{ years }} Yıl {{ months }} Ay {{ days }} Gün</span>
+                <span class="hero-timer-value" id="heroTimerValue">{{ years }} Yıl {{ months }} Ay {{ days }} Gün · 00:00:00</span>
                 <span class="hero-timer-date">{{ content.relationship_date.strftime('%d.%m.%Y') if content and content.relationship_date else '23.01.2023' }} &mdash; ∞</span>
             </div>
             <div class="hero-scroll">
@@ -243,6 +266,6 @@
             floatingRoses: {{ anim_settings.get('animation_floating_roses', '6') }}
         };
     </script>
-    <script src="/static/js/script.js?v=1"></script>
+    <script src="/static/js/script.js?v=2"></script>
 </body>
 </html>
