@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ content.title if content else 'Cerenim ❤️' }} - Bizim Hikayemiz</title>
+    <meta name="description" content="{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}">
+    <meta property="og:title" content="{{ content.title if content else 'Cerenim ❤️' }} - Bizim Hikayemiz">
+    <meta property="og:description" content="{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="{{ theme_settings.get('theme_primary_color', '#e94560') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,500&family=Inter:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: {{ theme_settings.get('theme_primary_color', '#e94560') }};
+            --secondary: {{ theme_settings.get('theme_secondary_color', '#ff6b6b') }};
+            --bg: {{ theme_settings.get('theme_background_color', '#060612') }};
+            --text: {{ theme_settings.get('theme_text_color', '#f0f0f0') }};
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/style.css?v=1">
+    <noscript>
+        <style>
+            .reveal { opacity: 1 !important; transform: none !important; }
+            #music-modal { display: none !important; }
+            .modal-overlay.active { display: none !important; }
+        </style>
+    </noscript>
+</head>
+<body>
+    <div id="floating-elements" role="presentation" aria-hidden="true"></div>
+
+    <!-- Music Modal -->
+    <div id="music-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="music-modal-title">
+        <div class="modal-card glass-card">
+            <div class="modal-rose" aria-hidden="true">🌹</div>
+            <p id="music-modal-title" class="modal-question">Bu hikayeyi müzik eşliğinde yaşamak ister misin?</p>
+            <div class="modal-buttons">
+                <button id="music-yes" class="modal-btn modal-btn-yes">Evet</button>
+                <button id="music-no" class="modal-btn modal-btn-no">Hayır</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Easter Egg Modal -->
+    <div id="easter-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="easter-text">
+        <div class="modal-card glass-card easter-card">
+            <div class="easter-stars" aria-hidden="true">✦ ✦ ✦</div>
+            <p id="easter-text" class="easter-text">Bu kadar yakından bakmaya devam edersen,<br>kalbimin içinde kendini göreceksin.</p>
+            <p class="easter-sub">— Sonsuza dek senin —</p>
+            <button id="easter-close" class="modal-btn modal-btn-yes">Kapat</button>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="modal-overlay lightbox" role="dialog" aria-modal="true" aria-label="Fotoğraf önizleme">
+        <button id="lightbox-close" class="lightbox-close" aria-label="Kapat">&times;</button>
+        <img id="lightbox-img" class="lightbox-image" src="" alt="">
+        <div class="lightbox-nav">
+            <button id="lightbox-prev" class="lightbox-arrow" aria-label="Önceki fotoğraf">&lsaquo;</button>
+            <button id="lightbox-next" class="lightbox-arrow" aria-label="Sonraki fotoğraf">&rsaquo;</button>
+        </div>
+    </div>
+
+    <!-- ==================== HERO ==================== -->
+    <section id="hero" aria-label="Kahraman bölümü">
+        <canvas id="starfield" role="presentation" aria-hidden="true"></canvas>
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-content">
+            <div class="hero-badge">{{ content.hero_badge if content and content.hero_badge else '❤️' }}</div>
+            <h1 class="hero-title">{{ content.title if content else 'Cerenim' }} <span class="heart-pulse" role="img" aria-label="kalp">❤️</span></h1>
+            <p class="hero-subtitle">{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}</p>
+            <div class="hero-timer" id="heroTimer">
+                <span class="hero-timer-label">{{ content.counter_title if content else 'Birlikteliğimiz' }}</span>
+                <span class="hero-timer-value" id="heroTimerValue">{{ years }} Yıl {{ months }} Ay {{ days }} Gün</span>
+                <span class="hero-timer-date">{{ content.relationship_date.strftime('%d.%m.%Y') if content and content.relationship_date else '23.01.2023' }} &mdash; ∞</span>
+            </div>
+            <div class="hero-scroll">
+                <span>Kaydır</span>
+                <div class="scroll-arrow" aria-hidden="true">↓</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== COUNTER ==================== -->
+    <section id="counter" class="section reveal" aria-label="Sayaç">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon" aria-hidden="true">⏳</span>
+                <h2>{{ content.counter_title if content else 'Her Saniye Değerli' }}</h2>
+                <p class="section-subtitle">{{ content.counter_subtitle if content else '23 Ocak 2023' }}</p>
+            </div>
+            <div class="counter-grid glass-card">
+                <div class="counter-item"><span class="counter-num" id="years">{{ years }}</span><span class="counter-label">Yıl</span></div>
+                <div class="counter-item"><span class="counter-num" id="months">{{ months }}</span><span class="counter-label">Ay</span></div>
+                <div class="counter-item"><span class="counter-num" id="days">{{ days }}</span><span class="counter-label">Gün</span></div>
+                <div class="counter-divider" aria-hidden="true"></div>
+                <div class="counter-item"><span class="counter-num" id="hours">00</span><span class="counter-label">Saat</span></div>
+                <div class="counter-item"><span class="counter-num" id="minutes">00</span><span class="counter-label">Dakika</span></div>
+                <div class="counter-item"><span class="counter-num" id="seconds">00</span><span class="counter-label">Saniye</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== NIGHT SKY ==================== -->
+    <section id="night-sky" class="section reveal" aria-label="Gece gökyüzü">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon" aria-hidden="true">🌙</span>
+                <h2>{{ content.night_sky_title if content else '23 Ocak 2023' }}</h2>
+                <p class="section-subtitle">{{ content.night_sky_subtitle if content else 'O gece gökyüzü bize gülümsüyordu...' }}</p>
+            </div>
+            <div class="night-sky-card glass-card">
+                <div class="night-sky-content">
+                    <p>{{ content.night_sky_text if content else 'Yıldızların en parlak olduğu gecede, iki kalp aynı anda attı. O günden beri gökyüzü bizim için hep aydınlık.' }}</p>
+                    <div class="night-sky-stars" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span><span>✧</span><span>✦</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== TIMELINE ==================== -->
+    <section id="timeline" class="section reveal" aria-label="Zaman tüneli">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon" aria-hidden="true">📖</span>
+                <h2>{{ content.timeline_title if content else 'Zaman Tüneli' }}</h2>
+                <p class="section-subtitle">{{ content.timeline_subtitle if content else 'Her anı bir ömür' }}</p>
+            </div>
+            <div class="timeline">
+                <div class="timeline-line" aria-hidden="true"></div>
+                {% for event in timeline_events %}
+                <div class="timeline-item {{ 'left' if loop.index % 2 != 0 else 'right' }} reveal">
+                    <div class="timeline-dot" aria-hidden="true"></div>
+                    <div class="timeline-card glass-card">
+                        <div class="timeline-date">{{ event.date_label }}</div>
+                        <h3>{{ event.title }}</h3>
+                        <p>{{ event.description or '' }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FUTURE ==================== -->
+    <section id="future" class="section reveal" aria-label="Gelecek hedefleri">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon" aria-hidden="true">💫</span>
+                <h2>{{ content.future_title if content else 'Gelecek' }}</h2>
+                <p class="section-subtitle">{{ content.future_subtitle if content else 'Hayallerimiz gerçek olacak' }}</p>
+            </div>
+            <div class="future-cards">
+                {% for milestone in milestones %}
+                <div class="future-card glass-card reveal">
+                    <div class="future-icon" aria-hidden="true">{{ milestone.icon }}</div>
+                    <h3>{{ milestone.title }}</h3>
+                    <p class="future-status">{{ milestone.status }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== GALLERY ==================== -->
+    <section id="gallery" class="section reveal" aria-label="Fotoğraf galerisi">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon" aria-hidden="true">📸</span>
+                <h2>{{ content.gallery_title if content else 'Fotoğraf Galerisi' }}</h2>
+                <p class="section-subtitle">{{ content.gallery_subtitle if content else 'Anılarımız burada birikecek' }}</p>
+            </div>
+            <div class="gallery-grid" id="galleryGrid">
+                <div class="gallery-frame glass-card reveal empty-frame">
+                    <div class="gallery-placeholder">
+                        <span class="placeholder-icon" aria-hidden="true">❤️</span>
+                        <span class="placeholder-text">Fotoğraflarını Bekliyor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== LOVE LETTER ==================== -->
+    <section id="love-letter" class="section reveal" aria-label="Aşk mektubu">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-icon" aria-hidden="true">💌</span>
+                <h2>{{ content.letter_title if content else 'Bir Mektup' }}</h2>
+                <p class="section-subtitle">{{ content.letter_subtitle if content else 'Sana yazdığım satırlar' }}</p>
+            </div>
+            <div class="envelope-wrapper">
+                <div class="envelope-rose left" aria-hidden="true">🌹</div>
+                <div class="envelope-rose right" aria-hidden="true">🤍</div>
+                <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Mektubu aç">
+                    <div class="envelope-flap" id="envelopeFlap" aria-hidden="true"></div>
+                    <div class="envelope-body">
+                        <div class="envelope-seal" aria-hidden="true">❤️</div>
+                    </div>
+                    <div class="letter-paper" id="letterPaper">
+                        <div class="letter-inner">
+                            <p class="letter-greeting">{{ content.letter_greeting if content else "Sevgili Ceren'im," }}</p>
+                            <div class="letter-body" id="letterBody"
+                                 data-paragraphs='{{ love_letter_paragraphs|tojson }}'>
+                            </div>
+                            <p class="letter-signature">
+                                Seni çok seven,<br>
+                                <span class="signature-name">{{ content.letter_signature_name if content else 'Sevgilin' }}</span>
+                                <span class="signature-heart" role="img" aria-label="kalp">❤️</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="reveal">
+        <div class="container">
+            <div class="footer-roses" aria-hidden="true">
+                <span>🌹</span>
+                <span class="footer-heart-main" role="img" aria-label="kalp">💖</span>
+                <span>🤍</span>
+            </div>
+            <p class="footer-text">{{ content.footer_text if content else 'Sonsuza dek birlikte...' }}</p>
+            <p class="footer-copy">&copy; <span id="year"></span> Bizim Hikayemiz</p>
+        </div>
+    </footer>
+
+    <script>
+        window.__ANIM_CONFIG__ = {
+            starCount: {{ anim_settings.get('animation_star_count', '4000') }},
+            heartCount: {{ anim_settings.get('animation_heart_count', '20') }},
+            shootingStarCount: {{ anim_settings.get('animation_shooting_star_count', '4') }},
+            floatingHearts: {{ anim_settings.get('animation_floating_hearts', '15') }},
+            floatingRoses: {{ anim_settings.get('animation_floating_roses', '6') }}
+        };
+    </script>
+    <script src="/static/js/script.js?v=1"></script>
+</body>
+</html>

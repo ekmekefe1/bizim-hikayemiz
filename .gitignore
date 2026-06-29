@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Flask / App
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Uploads (keep directory, ignore files)
+static/uploads/photos/*
+static/uploads/music/*
+static/uploads/night_sky/*
+!static/uploads/**/.gitkeep
+
+# Instance (database storage)
+instance/
+
+# Environment
+.env
+*.env.local
+
+# Flask debug artifacts
+flask_err.txt
+flask_log.txt
+
+# Root duplicates (accidental copies)
+/index.html
+/script.js
+/style.css
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Git
+*.orig

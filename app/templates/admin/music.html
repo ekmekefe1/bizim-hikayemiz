@@ -1,0 +1,59 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Müzik{% endblock %}
+{% block content %}
+<form method="POST" class="admin-form" enctype="multipart/form-data">
+    <div class="form-row">
+        <div class="form-group">
+            <label for="music_file">Müzik Dosyası</label>
+            <input type="file" name="music_file" id="music_file" class="form-input" accept="audio/*" required>
+        </div>
+        <div class="form-group">
+            <label for="title">Parça Adı</label>
+            <input type="text" name="title" id="title" class="form-input" placeholder="Parça adı...">
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Yükle</button>
+</form>
+
+<div class="admin-table-wrapper">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Parça</th>
+                <th>Dosya</th>
+                <th>Durum</th>
+                <th>Yüklenme</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for track in tracks %}
+            <tr>
+                <td>{{ track.title }}</td>
+                <td>{{ track.filename }}</td>
+                <td>
+                    {% if track.is_active %}
+                    <span class="badge badge-active">Aktif</span>
+                    {% else %}
+                    <span class="badge badge-inactive">Pasif</span>
+                    {% endif %}
+                </td>
+                <td>{{ track.uploaded_at.strftime('%d.%m.%Y') }}</td>
+                <td class="action-cell">
+                    {% if not track.is_active %}
+                    <form method="POST" action="{{ url_for('admin.music_activate', id=track.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-primary">Aktifleştir</button>
+                    </form>
+                    {% endif %}
+                    <form method="POST" action="{{ url_for('admin.music_delete', id=track.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="empty-table">Henüz müzik yüklenmemiş.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

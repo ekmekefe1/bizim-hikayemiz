@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Gelecek Hedefleri{% endblock %}
+{% block content %}
+<form method="POST" class="admin-form inline-form" action="{{ url_for('admin.milestone_edit', id=editing.id) if editing else url_for('admin.milestones') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-row four">
+        <div class="form-group">
+            {{ form.icon.label }}
+            {{ form.icon(class="form-input", placeholder="💍") }}
+        </div>
+        <div class="form-group">
+            {{ form.title.label }}
+            {{ form.title(class="form-input", placeholder="Nişanımız") }}
+        </div>
+        <div class="form-group">
+            {{ form.status.label }}
+            {{ form.status(class="form-input", placeholder="Yakında...") }}
+        </div>
+        <div class="form-group">
+            {{ form.order.label }}
+            {{ form.order(class="form-input", type="number", value=0) }}
+        </div>
+    </div>
+    {% if editing %}
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+    <a href="{{ url_for('admin.milestones') }}" class="btn" style="background:rgba(255,255,255,0.06);color:var(--text);margin-left:8px;">İptal</a>
+    {% else %}
+    <button type="submit" class="btn btn-primary">Ekle</button>
+    {% endif %}
+</form>
+
+<div class="admin-table-wrapper">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Sıra</th>
+                <th>İkon</th>
+                <th>Başlık</th>
+                <th>Durum</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for m in milestones %}
+            <tr>
+                <td>{{ m.order }}</td>
+                <td style="font-size:1.4rem;">{{ m.icon }}</td>
+                <td>{{ m.title }}</td>
+                <td>{{ m.status }}</td>
+                <td>
+                    <a href="{{ url_for('admin.milestone_edit', id=m.id) }}" class="btn btn-sm" style="background:rgba(255,255,255,0.06);color:var(--text);text-decoration:none;">Düzenle</a>
+                    <form method="POST" action="{{ url_for('admin.milestone_delete', id=m.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="empty-table">Henüz hedef eklenmemiş.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

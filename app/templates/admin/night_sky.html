@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Gece Gökyüzü{% endblock %}
+{% block content %}
+<div class="night-sky-preview">
+    <h3>Mevcut Görsel</h3>
+    {% if content and content.night_sky_image %}
+    <img src="{{ url_for('static', filename='uploads/night_sky/' + content.night_sky_image) }}" alt="Gece Gökyüzü" class="preview-image">
+    <form method="POST" action="{{ url_for('admin.night_sky_delete') }}" style="margin-top:12px;">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Görseli kaldırmak istediğinize emin misiniz?')">Görseli Kaldır</button>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <span class="empty-icon">🌙</span>
+        <p>Henüz gece gökyüzü görseli yüklenmemiş.</p>
+        <p class="empty-hint">Yüklediğiniz görsel, canvas animasyonunun yerine geçecektir.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="form-section" style="margin-top:30px;">
+    <h3>Yeni Görsel Yükle</h3>
+    <form method="POST" class="admin-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="night_sky_image">Görsel Seç (JPG, PNG, WEBP)</label>
+            <input type="file" name="night_sky_image" id="night_sky_image" class="form-input" accept="image/*" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Yükle</button>
+    </form>
+</div>
+{% endblock %}

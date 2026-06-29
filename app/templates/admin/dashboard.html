@@ -1,0 +1,77 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-info">
+            <span class="stat-value">İçerik</span>
+            <span class="stat-label">Site içeriği yönetimi</span>
+        </div>
+        <a href="{{ url_for('admin.content') }}" class="stat-link">Düzenle →</a>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📖</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ timeline_count }}</span>
+            <span class="stat-label">Zaman Tüneli Etkinliği</span>
+        </div>
+        <a href="{{ url_for('admin.timeline') }}" class="stat-link">Yönet →</a>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💫</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ milestone_count }}</span>
+            <span class="stat-label">Gelecek Hedefi</span>
+        </div>
+        <a href="{{ url_for('admin.milestones') }}" class="stat-link">Yönet →</a>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📸</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ photo_count }}</span>
+            <span class="stat-label">Fotoğraf</span>
+        </div>
+        <a href="{{ url_for('admin.photos') }}" class="stat-link">Yönet →</a>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🎵</div>
+        <div class="stat-info">
+            <span class="stat-value">{{ music_count }}</span>
+            <span class="stat-label">Müzik Parçası</span>
+        </div>
+        <a href="{{ url_for('admin.music') }}" class="stat-link">Yönet →</a>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">⚙️</div>
+        <div class="stat-info">
+            <span class="stat-value">Ayarlar</span>
+            <span class="stat-label">Tema & Animasyon</span>
+        </div>
+        <a href="{{ url_for('admin.settings') }}" class="stat-link">Düzenle →</a>
+    </div>
+</div>
+
+<div class="dashboard-preview">
+    <h3>Site Önizleme</h3>
+    <div class="preview-card">
+        <div class="preview-row">
+            <span class="preview-label">Başlık</span>
+            <span class="preview-value">{{ content.title if content else '—' }}</span>
+        </div>
+        <div class="preview-row">
+            <span class="preview-label">Alt Başlık</span>
+            <span class="preview-value">{{ content.subtitle if content else '—' }}</span>
+        </div>
+        <div class="preview-row">
+            <span class="preview-label">İlişki Tarihi</span>
+            <span class="preview-value">{{ content.relationship_date.strftime('%d.%m.%Y') if content and content.relationship_date else '—' }}</span>
+        </div>
+        <div class="preview-row">
+            <span class="preview-label">Gece Gökyüzü</span>
+            <span class="preview-value">{{ '✔️ Yüklendi' if content and content.night_sky_image else '❌ Yüklenmedi' }}</span>
+        </div>
+    </div>
+    <a href="{{ url_for('main.index') }}" target="_blank" class="btn btn-primary" style="margin-top: 16px; display: inline-flex;">Siteyi Aç</a>
+</div>
+{% endblock %}

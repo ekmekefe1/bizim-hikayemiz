@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Zaman Tüneli{% endblock %}
+{% block content %}
+<form method="POST" class="admin-form inline-form" action="{{ url_for('admin.timeline_edit', id=editing.id) if editing else url_for('admin.timeline') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-row four">
+        <div class="form-group">
+            {{ form.date_label.label }}
+            {{ form.date_label(class="form-input", placeholder="23 Ocak 2023") }}
+        </div>
+        <div class="form-group">
+            {{ form.title.label }}
+            {{ form.title(class="form-input", placeholder="İlk Buluşma") }}
+        </div>
+        <div class="form-group">
+            {{ form.description.label }}
+            {{ form.description(class="form-input", placeholder="Açıklama...") }}
+        </div>
+        <div class="form-group">
+            {{ form.order.label }}
+            {{ form.order(class="form-input", type="number", value=0) }}
+        </div>
+    </div>
+    {% if editing %}
+    <button type="submit" class="btn btn-primary">Güncelle</button>
+    <a href="{{ url_for('admin.timeline') }}" class="btn" style="background:rgba(255,255,255,0.06);color:var(--text);margin-left:8px;">İptal</a>
+    {% else %}
+    <button type="submit" class="btn btn-primary">Ekle</button>
+    {% endif %}
+</form>
+
+<div class="admin-table-wrapper">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Sıra</th>
+                <th>Tarih</th>
+                <th>Başlık</th>
+                <th>Açıklama</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+            <tr>
+                <td>{{ event.order }}</td>
+                <td>{{ event.date_label }}</td>
+                <td>{{ event.title }}</td>
+                <td>{{ event.description or '—' }}</td>
+                <td>
+                    <a href="{{ url_for('admin.timeline_edit', id=event.id) }}" class="btn btn-sm" style="background:rgba(255,255,255,0.06);color:var(--text);text-decoration:none;">Düzenle</a>
+                    <form method="POST" action="{{ url_for('admin.timeline_delete', id=event.id) }}" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Silmek istediğinize emin misiniz?')">Sil</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="empty-table">Henüz etkinlik eklenmemiş.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

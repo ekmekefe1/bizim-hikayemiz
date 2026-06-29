@@ -1,0 +1,87 @@
+{% extends "admin/base.html" %}
+{% block page_title %}Ayarlar{% endblock %}
+{% block content %}
+<div class="settings-grid">
+    <div class="settings-card">
+        <h3>Tema Ayarları</h3>
+        <form method="POST" class="admin-form">
+            {{ theme_form.hidden_tag() }}
+            <input type="hidden" name="theme" value="1">
+            <div class="form-group">
+                {{ theme_form.theme_primary_color.label }}
+                <div class="color-input-wrapper">
+                    {{ theme_form.theme_primary_color(class="form-input", placeholder="#e94560") }}
+                    <input type="color" class="color-picker" value="{{ theme_form.theme_primary_color.data or '#e94560' }}" onchange="this.previousElementSibling.value=this.value">
+                </div>
+            </div>
+            <div class="form-group">
+                {{ theme_form.theme_secondary_color.label }}
+                <div class="color-input-wrapper">
+                    {{ theme_form.theme_secondary_color(class="form-input", placeholder="#ff6b6b") }}
+                    <input type="color" class="color-picker" value="{{ theme_form.theme_secondary_color.data or '#ff6b6b' }}" onchange="this.previousElementSibling.value=this.value">
+                </div>
+            </div>
+            <div class="form-group">
+                {{ theme_form.theme_background_color.label }}
+                <div class="color-input-wrapper">
+                    {{ theme_form.theme_background_color(class="form-input", placeholder="#060612") }}
+                    <input type="color" class="color-picker" value="{{ theme_form.theme_background_color.data or '#060612' }}" onchange="this.previousElementSibling.value=this.value">
+                </div>
+            </div>
+            <div class="form-group">
+                {{ theme_form.theme_text_color.label }}
+                <div class="color-input-wrapper">
+                    {{ theme_form.theme_text_color(class="form-input", placeholder="#f0f0f0") }}
+                    <input type="color" class="color-picker" value="{{ theme_form.theme_text_color.data or '#f0f0f0' }}" onchange="this.previousElementSibling.value=this.value">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Tema Kaydet</button>
+        </form>
+    </div>
+
+    <div class="settings-card">
+        <h3>Animasyon Ayarları</h3>
+        <form method="POST" class="admin-form">
+            {{ anim_form.hidden_tag() }}
+            <input type="hidden" name="animation" value="1">
+            <div class="form-group">
+                {{ anim_form.animation_star_count.label }}
+                {{ anim_form.animation_star_count(class="form-input", type="number") }}
+            </div>
+            <div class="form-group">
+                {{ anim_form.animation_heart_count.label }}
+                {{ anim_form.animation_heart_count(class="form-input", type="number") }}
+            </div>
+            <div class="form-group">
+                {{ anim_form.animation_shooting_star_count.label }}
+                {{ anim_form.animation_shooting_star_count(class="form-input", type="number") }}
+            </div>
+            <div class="form-group">
+                {{ anim_form.animation_floating_hearts.label }}
+                {{ anim_form.animation_floating_hearts(class="form-input", type="number") }}
+            </div>
+            <div class="form-group">
+                {{ anim_form.animation_floating_roses.label }}
+                {{ anim_form.animation_floating_roses(class="form-input", type="number") }}
+            </div>
+            <div class="form-group">
+                {{ anim_form.animation_parallax.label }}
+                {{ anim_form.animation_parallax(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ anim_form.animation_scroll_reveal.label }}
+                {{ anim_form.animation_scroll_reveal(class="form-input") }}
+            </div>
+            <button type="submit" class="btn btn-primary">Animasyon Kaydet</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.color-picker').forEach(picker => {
+    picker.addEventListener('input', function() {
+        this.previousElementSibling.value = this.value;
+    });
+});
+</script>
+{% endblock %}

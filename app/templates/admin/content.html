@@ -1,0 +1,140 @@
+{% extends "admin/base.html" %}
+{% block page_title %}İçerik Yönetimi{% endblock %}
+{% block content %}
+<form method="POST" class="admin-form">
+    {{ form.hidden_tag() }}
+
+    <div class="form-section">
+        <h3>Hero Bölümü</h3>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form.title.label }}
+                {{ form.title(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.subtitle.label }}
+                {{ form.subtitle(class="form-input") }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form.hero_badge.label }}
+                {{ form.hero_badge(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.relationship_date.label }}
+                {{ form.relationship_date(class="form-input", type="date") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Sayaç Bölümü</h3>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form.counter_title.label }}
+                {{ form.counter_title(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.counter_subtitle.label }}
+                {{ form.counter_subtitle(class="form-input") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Gece Gökyüzü Bölümü</h3>
+        <div class="form-row three">
+            <div class="form-group">
+                {{ form.night_sky_title.label }}
+                {{ form.night_sky_title(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.night_sky_subtitle.label }}
+                {{ form.night_sky_subtitle(class="form-input") }}
+            </div>
+        </div>
+        <div class="form-group">
+            {{ form.night_sky_text.label }}
+            {{ form.night_sky_text(class="form-input form-textarea", rows=3) }}
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Zaman Tüneli Bölümü</h3>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form.timeline_title.label }}
+                {{ form.timeline_title(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.timeline_subtitle.label }}
+                {{ form.timeline_subtitle(class="form-input") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Gelecek Bölümü</h3>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form.future_title.label }}
+                {{ form.future_title(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.future_subtitle.label }}
+                {{ form.future_subtitle(class="form-input") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Galeri Bölümü</h3>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form.gallery_title.label }}
+                {{ form.gallery_title(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.gallery_subtitle.label }}
+                {{ form.gallery_subtitle(class="form-input") }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Mektup Bölümü</h3>
+        <div class="form-row three">
+            <div class="form-group">
+                {{ form.letter_title.label }}
+                {{ form.letter_title(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.letter_subtitle.label }}
+                {{ form.letter_subtitle(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.letter_greeting.label }}
+                {{ form.letter_greeting(class="form-input") }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form.letter_signature_name.label }}
+                {{ form.letter_signature_name(class="form-input") }}
+            </div>
+            <div class="form-group">
+                {{ form.footer_text.label }}
+                {{ form.footer_text(class="form-input") }}
+            </div>
+        </div>
+        <div class="form-group">
+            {{ form.love_letter.label }}
+            {{ form.love_letter(class="form-input form-textarea", rows=8) }}
+            <p class="form-hint">Her paragrafı yeni bir satırla ayırın. Her satır ayrı bir paragraf olarak görünecektir.</p>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+</form>
+{% endblock %}

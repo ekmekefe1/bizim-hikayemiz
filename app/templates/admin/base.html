@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %} - Bizim Hikayemiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-icon">❤️</span>
+                <span class="brand-text">Admin Panel</span>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                    <span class="nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="{{ url_for('admin.content') }}" class="nav-item {% if request.endpoint == 'admin.content' %}active{% endif %}">
+                    <span class="nav-icon">📝</span>
+                    <span>İçerik</span>
+                </a>
+                <a href="{{ url_for('admin.timeline') }}" class="nav-item {% if request.endpoint == 'admin.timeline' %}active{% endif %}">
+                    <span class="nav-icon">📖</span>
+                    <span>Zaman Tüneli</span>
+                </a>
+                <a href="{{ url_for('admin.milestones') }}" class="nav-item {% if request.endpoint == 'admin.milestones' %}active{% endif %}">
+                    <span class="nav-icon">💫</span>
+                    <span>Hedefler</span>
+                </a>
+                <a href="{{ url_for('admin.photos') }}" class="nav-item {% if request.endpoint == 'admin.photos' %}active{% endif %}">
+                    <span class="nav-icon">📸</span>
+                    <span>Fotoğraflar</span>
+                </a>
+                <a href="{{ url_for('admin.music') }}" class="nav-item {% if request.endpoint == 'admin.music' %}active{% endif %}">
+                    <span class="nav-icon">🎵</span>
+                    <span>Müzik</span>
+                </a>
+                <a href="{{ url_for('admin.night_sky') }}" class="nav-item {% if request.endpoint == 'admin.night_sky' %}active{% endif %}">
+                    <span class="nav-icon">🌙</span>
+                    <span>Gece Gökyüzü</span>
+                </a>
+                <a href="{{ url_for('admin.settings') }}" class="nav-item {% if request.endpoint == 'admin.settings' %}active{% endif %}">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Ayarlar</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="{{ url_for('main.index') }}" target="_blank" class="nav-item">
+                    <span class="nav-icon">🌐</span>
+                    <span>Siteyi Gör</span>
+                </a>
+                <a href="{{ url_for('admin.logout') }}" class="nav-item">
+                    <span class="nav-icon">🚪</span>
+                    <span>Çıkış</span>
+                </a>
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="topbar">
+                <h2>{% block page_title %}Dashboard{% endblock %}</h2>
+                <div class="topbar-user">
+                    <span class="user-avatar">👤</span>
+                    <span>{{ current_user.username }}</span>
+                </div>
+            </header>
+            <div class="content-body">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+    {% else %}
+    {% block body %}{% endblock %}
+    {% endif %}
+</body>
+</html>
