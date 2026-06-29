@@ -2,24 +2,27 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 from datetime import datetime, date
+from pathlib import Path
 from flask import Flask, jsonify, request, render_template
 from config import Config
 from app.extensions import db, login_manager, bcrypt, csrf
 
 def create_app(config_class=Config):
-    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    root_dir = Path(__file__).resolve().parent.parent
     app = Flask(
         __name__,
         template_folder='templates',
-        static_folder=os.path.join(root_dir, 'static'),
+        static_folder=str(root_dir / 'static'),
         static_url_path='/static'
     )
     app.config.from_object(config_class)
 
+    _ensure_directories(root_dir)
+
     if not app.debug and not app.testing:
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-        file_handler = RotatingFileHandler('logs/bizim-hikayemiz.log', maxBytes=10240, backupCount=10)
+        logs_dir = root_dir / 'logs'
+        logs_dir.mkdir(exist_ok=True)
+        file_handler = RotatingFileHandler(str(logs_dir / 'bizim-hikayemiz.log'), maxBytes=10240, backupCount=10)
         file_handler.setFormatter(logging.Formatter(
             '%(asctime)s %(levelname)s [%(name)s] %(message)s'
         ))
@@ -77,6 +80,17 @@ def create_app(config_class=Config):
         _create_default_settings()
 
     return app
+
+def _ensure_directories(root_dir):
+    dirs = [
+        root_dir / 'instance',
+        root_dir / 'static' / 'uploads',
+        root_dir / 'static' / 'uploads' / 'photos',
+        root_dir / 'static' / 'uploads' / 'music',
+        root_dir / 'static' / 'uploads' / 'night_sky',
+    ]
+    for d in dirs:
+        d.mkdir(parents=True, exist_ok=True)
 
 def _create_default_admin():
     from app.models import User
