@@ -3,13 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const qs = (sel, ctx) => (ctx || document).querySelector(sel);
     const qsa = (sel, ctx) => (ctx || document).querySelectorAll(sel);
 
-    const cfg = window.__ANIM_CONFIG__ || {};
-
-    function safeInt(val, def) {
-        const n = parseInt(val, 10);
-        return Number.isFinite(n) ? n : def;
-    }
-
     // =============================================
     // 0. PREVENT SCROLL & WHEEL
     // =============================================
@@ -31,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. VIEW NAVIGATION
     // =============================================
     const views = qsa('.view');
+    const navbarLinks = qsa('.navbar-link');
     const drawerLinks = qsa('.drawer-link');
     const drawer = $('drawer');
     const drawerBackdrop = $('drawerBackdrop');
@@ -46,11 +40,19 @@ document.addEventListener('DOMContentLoaded', () => {
             target.classList.add('active');
             currentView = viewId;
         }
-        drawerLinks.forEach(l => {
-            l.classList.toggle('active', l.dataset.view === viewId);
-        });
+        navbarLinks.forEach(l => l.classList.toggle('active', l.dataset.view === viewId));
+        drawerLinks.forEach(l => l.classList.toggle('active', l.dataset.view === viewId));
         closeDrawer();
     }
+
+    navbarLinks.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const view = link.dataset.view;
+            switchView(view);
+            history.replaceState(null, '', '#' + view);
+        });
+    });
 
     drawerLinks.forEach(link => {
         link.addEventListener('click', e => {
@@ -61,14 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Handle hash on load
     const hash = window.location.hash.replace('#', '');
     if (hash && $('view-' + hash)) {
         switchView(hash);
     }
 
     // =============================================
-    // 2. DRAWER
+    // 2. DRAWER (mobile only)
     // =============================================
     function openDrawer() {
         drawer.classList.add('active');
@@ -80,143 +81,65 @@ document.addEventListener('DOMContentLoaded', () => {
         drawerBackdrop.classList.remove('active');
     }
 
-    menuToggle.addEventListener('click', openDrawer);
-    drawerClose.addEventListener('click', closeDrawer);
-    drawerBackdrop.addEventListener('click', closeDrawer);
+    if (menuToggle) menuToggle.addEventListener('click', openDrawer);
+    if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+    if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape' && drawer.classList.contains('active')) {
             closeDrawer();
         }
     });
 
-    // =============================================
-    // 3. SUBTLE STARS CANVAS
-    // =============================================
-    const canvas = $('stars-canvas');
-    if (canvas) {
-        const ctx = canvas.getContext('2d');
-        let w, h;
-
-        function resize() {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-        }
-        resize();
-        window.addEventListener('resize', resize);
-
-        const count = Math.min(safeInt(cfg.starCount, 150), 300);
-        const stars = Array.from({ length: count }, () => ({
-            x: Math.random() * w,
-            y: Math.random() * h,
-            size: 0.3 + Math.random() * 0.5,
-            bright: 0.1 + Math.random() * 0.2,
-            speed: 0.005 + Math.random() * 0.015,
-            phase: Math.random() * Math.PI * 2
-        }));
-
-        class ShootingStar {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.active = false;
-                this.x = 0; this.y = 0;
-                this.speed = 6 + Math.random() * 8;
-                this.angle = Math.PI / 4 + (Math.random() - 0.3) * Math.PI / 4;
-                this.opacity = 1;
-                this.timer = 0;
-                this.delay = 8000 + Math.random() * 20000;
-            }
-            update(dt) {
-                if (!this.active) {
-                    this.timer += dt;
-                    if (this.timer >= this.delay) {
-                        this.active = true;
-                        this.timer = 0;
-                        this.x = 50 + Math.random() * (w * 0.5);
-                        this.y = Math.random() * h * 0.2;
-                        this.opacity = 1;
-                    }
-                    return;
-                }
-                const dx = Math.cos(this.angle) * this.speed;
-                const dy = Math.sin(this.angle) * this.speed;
-                this.x += dx; this.y += dy;
-                this.opacity -= 0.02;
-                if (this.opacity <= 0 || this.x > w + 100 || this.y > h + 100) {
-                    this.active = false;
-                    this.delay = 10000 + Math.random() * 30000;
-                    this.timer = 0;
-                }
-            }
-            draw() {
-                if (!this.active) return;
-                const len = 40 + Math.random() * 60;
-                const gx = this.x - Math.cos(this.angle) * len;
-                const gy = this.y - Math.sin(this.angle) * len;
-                const grad = ctx.createLinearGradient(this.x, this.y, gx, gy);
-                grad.addColorStop(0, `rgba(247,232,228,${this.opacity})`);
-                grad.addColorStop(1, 'rgba(247,232,228,0)');
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(gx, gy);
-                ctx.strokeStyle = grad;
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
-            }
-        }
-
-        const shootingStars = Array.from({ length: safeInt(cfg.shootingStarCount, 1) }, () => new ShootingStar());
-
-        let lastT = 0;
-        function animate(time) {
-            const dt = lastT ? Math.min(time - lastT, 50) : 16;
-            lastT = time;
-            ctx.clearRect(0, 0, w, h);
-            stars.forEach(s => {
-                const t = time * s.speed + s.phase;
-                const a = s.bright * (0.5 + 0.5 * Math.sin(t));
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(247,232,228,${Math.max(0.02, a)})`;
-                ctx.fill();
-            });
-            shootingStars.forEach(ss => { ss.update(dt); ss.draw(); });
-            requestAnimationFrame(animate);
-        }
-        requestAnimationFrame(animate);
-
-        // =============================================
-        // 4. EASTER EGG (moon click)
-        // =============================================
-        let moonClickCount = 0;
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const cx = e.clientX - rect.left;
-            const cy = e.clientY - rect.top;
-            const moonX = w * 0.8, moonY = h * 0.1, moonR = Math.min(w, h) * 0.05;
-            const dx = cx - moonX, dy = cy - moonY;
-            if (Math.sqrt(dx * dx + dy * dy) < moonR * 2) {
-                moonClickCount++;
-                if (moonClickCount >= 5) {
-                    moonClickCount = 0;
-                    const em = $('easter-modal');
-                    if (em) em.classList.add('active');
-                }
-            }
-        });
+    // Swipe to close drawer
+    if (drawer) {
+        let drawerTouchX = 0;
+        drawer.addEventListener('touchstart', e => {
+            drawerTouchX = e.touches[0].clientX;
+        }, { passive: true });
+        drawer.addEventListener('touchmove', e => {
+            const dx = e.touches[0].clientX - drawerTouchX;
+            if (dx > 0) drawer.style.transform = 'translateX(' + dx + 'px)';
+        }, { passive: true });
+        drawer.addEventListener('touchend', e => {
+            drawer.style.transform = '';
+            const dx = e.changedTouches[0].clientX - drawerTouchX;
+            if (dx > 60) closeDrawer();
+        }, { passive: true });
     }
 
     // =============================================
-    // 5. RELATIONSHIP TIMER
+    // 3. EASTER EGG (brand click)
+    // =============================================
+    let easterClickCount = 0;
+    const brand = qs('.navbar-brand');
+    if (brand) {
+        brand.addEventListener('click', () => {
+            easterClickCount++;
+            if (easterClickCount >= 5) {
+                easterClickCount = 0;
+                const em = $('easter-modal');
+                if (em) em.classList.add('active');
+            }
+        });
+        brand.style.cursor = 'pointer';
+    }
+
+    // Easter egg close
+    const easterClose = $('easter-close');
+    const easterModal = $('easter-modal');
+    if (easterClose) easterClose.addEventListener('click', () => easterModal.classList.remove('active'));
+    if (easterModal) easterModal.addEventListener('click', (e) => { if (e.target === easterModal) easterModal.classList.remove('active'); });
+
+    // =============================================
+    // 4. RELATIONSHIP TIMER
     // =============================================
     function parseRelationshipDate() {
         return new Date(2023, 0, 23);
     }
 
     const relationshipStart = parseRelationshipDate();
-
     let prevTimerValues = {};
+
     function updateTimers() {
         const now = new Date();
         let years = now.getFullYear() - relationshipStart.getFullYear();
@@ -244,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateTimers, 1000);
 
     // =============================================
-    // 6. MUSIC MODAL
+    // 5. MUSIC MODAL
     // =============================================
     const musicModal = $('music-modal');
     const musicYes = $('music-yes');
@@ -254,36 +177,33 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMusicModal() { musicModal.classList.add('active'); }
     function hideMusicModal() { musicModal.classList.remove('active'); }
 
-    musicYes.addEventListener('click', async () => {
-        hideMusicModal();
-        try {
-            const res = await fetch('/api/music');
-            const tracks = await res.json();
-            if (tracks.length > 0) {
-                audio = new Audio(tracks[0].url);
-                audio.loop = true;
-                audio.volume = 0.3;
-                audio.play().catch(() => {});
-                createMusicIndicator();
-            }
-        } catch (e) {}
-    });
-
-    musicNo.addEventListener('click', hideMusicModal);
-
-    function createMusicIndicator() {
-        const div = document.createElement('div');
-        div.className = 'music-indicator';
-        div.id = 'musicIndicator';
-        div.innerHTML = '<span class="note-icon">♪</span> Müzik açık';
-        document.body.appendChild(div);
-        requestAnimationFrame(() => div.classList.add('visible'));
+    if (musicYes) {
+        musicYes.addEventListener('click', async () => {
+            hideMusicModal();
+            try {
+                const res = await fetch('/api/music');
+                const tracks = await res.json();
+                if (tracks.length > 0) {
+                    audio = new Audio(tracks[0].url);
+                    audio.loop = true;
+                    audio.volume = 0.3;
+                    audio.play().catch(() => {});
+                    const div = document.createElement('div');
+                    div.className = 'music-indicator';
+                    div.id = 'musicIndicator';
+                    div.innerHTML = '<span class="note-icon">♪</span> Müzik açık';
+                    document.body.appendChild(div);
+                    requestAnimationFrame(() => div.classList.add('visible'));
+                }
+            } catch (e) {}
+        });
     }
+    if (musicNo) musicNo.addEventListener('click', hideMusicModal);
 
     setTimeout(showMusicModal, 1200);
 
     // =============================================
-    // 7. ENVELOPE LOVE LETTER
+    // 6. ENVELOPE LOVE LETTER
     // =============================================
     const envelope = $('envelope');
     const letterBody = $('letterBody');
@@ -348,15 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =============================================
-    // 8. EASTER EGG MODAL
-    // =============================================
-    const easterClose = $('easter-close');
-    const easterModal = $('easter-modal');
-    if (easterClose) easterClose.addEventListener('click', () => easterModal.classList.remove('active'));
-    if (easterModal) easterModal.addEventListener('click', (e) => { if (e.target === easterModal) easterModal.classList.remove('active'); });
-
-    // =============================================
-    // 9. GALLERY + LIGHTBOX
+    // 7. GALLERY + LIGHTBOX
     // =============================================
     const galleryGrid = $('galleryGrid');
     const lightbox = $('lightbox');
@@ -374,15 +286,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function cloudinarySrc(url, width) {
         if (!isCloudinaryUrl(url)) return url;
         if (!width) return url;
-        return url.replace('/upload/', `/upload/w_${width},f_auto,q_auto/`);
+        return url.replace('/upload/', '/upload/w_' + width + ',f_auto,q_auto/');
     }
 
     function cloudinarySrcset(url) {
         if (!isCloudinaryUrl(url)) return '';
         const widths = [400, 800, 1200];
         return widths.map(w => {
-            const src = url.replace('/upload/', `/upload/w_${w/2},f_auto,q_auto/`);
-            return `${src} ${w}w`;
+            return url.replace('/upload/', '/upload/w_' + (w/2) + ',f_auto,q_auto/') + ' ' + w + 'w';
         }).join(', ');
     }
 
@@ -477,12 +388,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'ArrowRight') nextImage();
     });
 
-    // Touch swipe for lightbox
     let touchStartX = 0;
     if (lightbox) {
-        lightbox.addEventListener('touchstart', e => {
-            touchStartX = e.touches[0].clientX;
-        }, { passive: true });
+        lightbox.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
         lightbox.addEventListener('touchend', e => {
             if (!lightbox.classList.contains('active')) return;
             const dx = e.changedTouches[0].clientX - touchStartX;
@@ -494,23 +402,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadGallery();
-
-    // =============================================
-    // 10. SWIPE TO CLOSE DRAWER
-    // =============================================
-    let drawerTouchX = 0;
-    drawer.addEventListener('touchstart', e => {
-        drawerTouchX = e.touches[0].clientX;
-    }, { passive: true });
-    drawer.addEventListener('touchmove', e => {
-        const dx = e.touches[0].clientX - drawerTouchX;
-        if (dx > 0) {
-            drawer.style.transform = `translateX(${dx}px)`;
-        }
-    }, { passive: true });
-    drawer.addEventListener('touchend', e => {
-        drawer.style.transform = '';
-        const dx = e.changedTouches[0].clientX - drawerTouchX;
-        if (dx > 60) closeDrawer();
-    }, { passive: true });
 });
