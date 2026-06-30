@@ -14,6 +14,11 @@ class Config:
     WTF_CSRF_ENABLED = True
     REMEMBER_COOKIE_DURATION = timedelta(days=7)
 
+    # Cloudinary
+    CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', '')
+    CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY', '')
+    CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', '')
+
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or str(_basedir / 'static' / 'uploads')
     MAX_CONTENT_LENGTH = 50 * 1024 * 1024
     ALLOWED_PHOTO_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'}

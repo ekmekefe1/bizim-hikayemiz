@@ -4,7 +4,7 @@
 <div class="night-sky-preview">
     <h3>Mevcut Görsel</h3>
     {% if content and content.hero_background %}
-    <img src="{{ url_for('main.uploaded_file', filename='hero/' + content.hero_background) }}" alt="Hero Arkaplan" class="preview-image">
+    <img src="{% if content.hero_background.startswith('http') %}{{ content.hero_background }}{% else %}{{ url_for('main.uploaded_file', filename='hero/' + content.hero_background) }}{% endif %}" alt="Hero Arkaplan" class="preview-image">
     <form method="POST" action="{{ url_for('admin.hero_background_delete') }}" style="margin-top:12px;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-danger" onclick="return confirm('Görseli kaldırmak istediğinize emin misiniz?')">Görseli Kaldır</button>

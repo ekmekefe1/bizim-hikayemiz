@@ -38,11 +38,17 @@ def index():
 
     night_sky_url = None
     if content and content.night_sky_image:
-        night_sky_url = '/uploads/night_sky/' + content.night_sky_image
+        if content.night_sky_image.startswith('http'):
+            night_sky_url = content.night_sky_image
+        else:
+            night_sky_url = '/uploads/night_sky/' + content.night_sky_image
 
     hero_background_url = None
     if content and content.hero_background:
-        hero_background_url = '/uploads/hero/' + content.hero_background
+        if content.hero_background.startswith('http'):
+            hero_background_url = content.hero_background
+        else:
+            hero_background_url = '/uploads/hero/' + content.hero_background
 
     love_letter_paragraphs = []
     if content and content.love_letter:
@@ -139,7 +145,8 @@ def api_night_sky():
     try:
         content = SiteContent.query.first()
         if content and content.night_sky_image:
-            return jsonify({'url': '/uploads/night_sky/' + content.night_sky_image})
+            url = content.night_sky_image if content.night_sky_image.startswith('http') else '/uploads/night_sky/' + content.night_sky_image
+            return jsonify({'url': url})
         return jsonify({'url': None})
     except Exception as e:
         logger.error(f'Error in api_night_sky: {e}')

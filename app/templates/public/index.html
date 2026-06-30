@@ -3,24 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ content.title if content else 'Cerenim ❤️' }} - Bizim Hikayemiz</title>
+    <title>{{ content.title if content else 'Cerenim' }} — Bizim Hikayemiz</title>
     <meta name="description" content="{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}">
-    <meta property="og:title" content="{{ content.title if content else 'Cerenim ❤️' }} - Bizim Hikayemiz">
+    <meta property="og:title" content="{{ content.title if content else 'Cerenim' }} — Bizim Hikayemiz">
     <meta property="og:description" content="{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}">
     <meta property="og:type" content="website">
-    <meta name="theme-color" content="{{ theme_settings.get('theme_primary_color', '#e94560') }}">
+    <meta name="theme-color" content="#0a0a12">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@200;300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: {{ theme_settings.get('theme_primary_color', '#e94560') }};
-            --secondary: {{ theme_settings.get('theme_secondary_color', '#ff6b6b') }};
-            --bg: {{ theme_settings.get('theme_background_color', '#060612') }};
-            --text: {{ theme_settings.get('theme_text_color', '#f0f0f0') }};
-        }
-    </style>
-    <link rel="stylesheet" href="/static/css/style.css?v=4">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
     <noscript>
         <style>
             .reveal { opacity: 1 !important; transform: none !important; }
@@ -28,13 +20,10 @@
     </noscript>
 </head>
 <body>
-    <div id="floating-elements" role="presentation" aria-hidden="true"></div>
-
     <!-- ==================== NAVBAR ==================== -->
     <nav id="navbar" class="navbar" role="navigation" aria-label="Ana navigasyon">
         <div class="navbar-inner">
             <a href="#hero" class="navbar-logo">
-                <span class="logo-heart" role="img" aria-label="kalp">❤️</span>
                 <span class="logo-text">Bizim Hikayemiz</span>
             </a>
             <div class="navbar-links" id="navbarLinks">
@@ -51,13 +40,11 @@
                 <span class="toggle-bar"></span>
             </button>
         </div>
-        <div class="navbar-indicator" id="navbarIndicator"></div>
     </nav>
 
     <!-- ==================== MUSIC PROMPT ==================== -->
-    <div id="music-prompt" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="music-prompt-title">
+    <div id="music-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="music-prompt-title">
         <div class="modal-card glass-card">
-            <div class="modal-rose" aria-hidden="true">🌹</div>
             <p id="music-prompt-title" class="modal-question">Bu hikayeyi müzik eşliğinde yaşamak ister misin?</p>
             <div class="modal-buttons">
                 <button id="music-yes" class="modal-btn modal-btn-primary">Evet</button>
@@ -70,7 +57,7 @@
     <div id="music-player" class="music-player" role="region" aria-label="Müzik çalar">
         <div class="player-inner">
             <div class="player-album">
-                <div class="player-album-art" id="playerAlbumArt">🎵</div>
+                <div class="player-album-art" id="playerAlbumArt">♪</div>
             </div>
             <div class="player-info">
                 <div class="player-track" id="playerTrack">Bizim Hikayemiz</div>
@@ -78,7 +65,7 @@
             </div>
             <div class="player-controls">
                 <button class="player-btn" id="playerPlay" aria-label="Oynat/Duraklat">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 </button>
             </div>
             <div class="player-progress-wrap">
@@ -89,7 +76,7 @@
             </div>
             <div class="player-volume">
                 <button class="player-btn player-volume-btn" id="playerVolumeBtn" aria-label="Ses">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
                 </button>
                 <div class="player-volume-slider" id="playerVolumeSlider">
                     <div class="player-volume-track">
@@ -104,7 +91,6 @@
     <!-- ==================== EASTER EGG ==================== -->
     <div id="easter-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="easter-text">
         <div class="modal-card glass-card easter-card">
-            <div class="easter-stars" aria-hidden="true">✦ ✦ ✦</div>
             <p id="easter-text" class="easter-text">Bu kadar yakından bakmaya devam edersen,<br>kalbimin içinde kendini göreceksin.</p>
             <p class="easter-sub">— Sonsuza dek senin —</p>
             <button id="easter-close" class="modal-btn modal-btn-primary">Kapat</button>
@@ -128,15 +114,14 @@
         {% endif %}
         <canvas id="starfield" role="presentation" aria-hidden="true"></canvas>
         <div class="hero-overlay" aria-hidden="true"></div>
-            <div class="hero-content" id="heroContent">
-                <div class="hero-badge">{{ content.hero_badge if content and content.hero_badge else '❤️' }}</div>
-                <h1 class="hero-title">{{ content.title if content else 'Cerenim' }}</h1>
-                <p class="hero-subtitle">{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}</p>
-                <div class="hero-scroll">
-                    <span>Aşağı kaydır</span>
-                    <div class="scroll-arrow" aria-hidden="true">↓</div>
-                </div>
-            </div>
+        <div class="hero-content" id="heroContent">
+            <h1 class="hero-title">{{ content.title if content else 'Cerenim' }}</h1>
+            <p class="hero-subtitle">{{ content.subtitle if content else 'İyi ki hayatıma girdin.' }}</p>
+        </div>
+        <div class="hero-scroll">
+            <span>Aşağı kaydır</span>
+            <div class="scroll-arrow" aria-hidden="true">↓</div>
+        </div>
     </section>
 
     <!-- ==================== COUNTER ==================== -->
@@ -144,7 +129,6 @@
         <div class="container">
             <div class="counter-card glass-card">
                 <div class="counter-header">
-                    <span class="counter-icon" aria-hidden="true">⏳</span>
                     <h2>{{ content.counter_title if content else 'Her Saniye Değerli' }}</h2>
                     <p class="counter-subtitle">{{ content.counter_subtitle if content else '23 Ocak 2023' }}</p>
                 </div>
@@ -172,7 +156,6 @@
     <section id="night-sky" class="section reveal" aria-label="Gece gökyüzü">
         <div class="container">
             <div class="section-header">
-                <span class="section-icon" aria-hidden="true">🌙</span>
                 <h2>{{ content.night_sky_title if content else '23 Ocak 2023' }}</h2>
                 <p class="section-subtitle">{{ content.night_sky_subtitle if content else 'O gece gökyüzü bize gülümsüyordu...' }}</p>
             </div>
@@ -189,7 +172,6 @@
     <section id="timeline" class="section reveal" aria-label="Zaman tüneli">
         <div class="container">
             <div class="section-header">
-                <span class="section-icon" aria-hidden="true">📖</span>
                 <h2>{{ content.timeline_title if content else 'Zaman Tüneli' }}</h2>
                 <p class="section-subtitle">{{ content.timeline_subtitle if content else 'Her anı bir ömür' }}</p>
             </div>
@@ -213,7 +195,6 @@
     <section id="future" class="section reveal" aria-label="Gelecek hedefleri">
         <div class="container">
             <div class="section-header">
-                <span class="section-icon" aria-hidden="true">💫</span>
                 <h2>{{ content.future_title if content else 'Gelecek' }}</h2>
                 <p class="section-subtitle">{{ content.future_subtitle if content else 'Hayallerimiz gerçek olacak' }}</p>
             </div>
@@ -233,14 +214,12 @@
     <section id="gallery" class="section reveal" aria-label="Fotoğraf galerisi">
         <div class="container">
             <div class="section-header">
-                <span class="section-icon" aria-hidden="true">📸</span>
                 <h2>{{ content.gallery_title if content else 'Fotoğraf Galerisi' }}</h2>
                 <p class="section-subtitle">{{ content.gallery_subtitle if content else 'Anılarımız burada birikecek' }}</p>
             </div>
             <div class="gallery-grid" id="galleryGrid">
-                <div class="gallery-frame glass-card empty-frame">
+                <div class="gallery-frame empty-frame">
                     <div class="gallery-placeholder">
-                        <span class="placeholder-icon" aria-hidden="true">❤️</span>
                         <span class="placeholder-text">Fotoğraflarını Bekliyor</span>
                     </div>
                 </div>
@@ -252,17 +231,14 @@
     <section id="love-letter" class="section reveal" aria-label="Aşk mektubu">
         <div class="container">
             <div class="section-header">
-                <span class="section-icon" aria-hidden="true">💌</span>
                 <h2>{{ content.letter_title if content else 'Bir Mektup' }}</h2>
                 <p class="section-subtitle">{{ content.letter_subtitle if content else 'Sana yazdığım satırlar' }}</p>
             </div>
             <div class="letter-wrapper">
-                <div class="letter-rose left" aria-hidden="true">🌹</div>
-                <div class="letter-rose right" aria-hidden="true">🤍</div>
                 <div class="letter-envelope" id="envelope" role="button" tabindex="0" aria-label="Mektubu aç">
                     <div class="letter-flap" id="envelopeFlap" aria-hidden="true"></div>
                     <div class="letter-body-bg">
-                        <div class="letter-seal" aria-hidden="true">❤️</div>
+                        <div class="letter-seal" aria-hidden="true">♡</div>
                     </div>
                     <div class="letter-paper" id="letterPaper">
                         <div class="letter-inner">
@@ -273,7 +249,7 @@
                             <p class="letter-signature">
                                 Seni çok seven,<br>
                                 <span class="letter-name">{{ content.letter_signature_name if content else 'Sevgilin' }}</span>
-                                <span class="letter-heart" role="img" aria-label="kalp">❤️</span>
+                                <span class="letter-heart" role="img" aria-label="kalp">♡</span>
                             </p>
                         </div>
                     </div>
@@ -286,11 +262,6 @@
     <footer class="reveal">
         <div class="container">
             <div class="footer-divider" aria-hidden="true"></div>
-            <div class="footer-emblems" aria-hidden="true">
-                <span>🌹</span>
-                <span class="footer-heart">💖</span>
-                <span>🤍</span>
-            </div>
             <p class="footer-quote">{{ content.footer_text if content else 'Sonsuza dek birlikte...' }}</p>
             <p class="footer-copyright">&copy; <span id="year"></span> Bizim Hikayemiz</p>
         </div>
@@ -298,13 +269,13 @@
 
     <script>
         window.__ANIM_CONFIG__ = {
-            starCount: {{ anim_settings.get('animation_star_count', '1200') }},
-            heartCount: {{ anim_settings.get('animation_heart_count', '3') }},
-            shootingStarCount: {{ anim_settings.get('animation_shooting_star_count', '2') }},
-            floatingHearts: {{ anim_settings.get('animation_floating_hearts', '3') }},
+            starCount: {{ anim_settings.get('animation_star_count', '800') }},
+            heartCount: {{ anim_settings.get('animation_heart_count', '1') }},
+            shootingStarCount: {{ anim_settings.get('animation_shooting_star_count', '1') }},
+            floatingHearts: {{ anim_settings.get('animation_floating_hearts', '1') }},
             floatingRoses: {{ anim_settings.get('animation_floating_roses', '1') }}
         };
     </script>
-    <script src="/static/js/script.js?v=4"></script>
+    <script src="/static/js/script.js?v=5"></script>
 </body>
 </html>

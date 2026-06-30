@@ -37,9 +37,9 @@ class SiteContent(db.Model):
     night_sky_title = db.Column(db.String(200), default='23 Ocak 2023')
     night_sky_subtitle = db.Column(db.String(300), default='O gece gökyüzü bize gülümsüyordu...')
     night_sky_text = db.Column(db.Text, default='Yıldızların en parlak olduğu gecede...')
-    hero_background = db.Column(db.String(200), nullable=True)
-    night_sky_image = db.Column(db.String(200), nullable=True)
-    music_file = db.Column(db.String(200), nullable=True)
+    hero_background = db.Column(db.String(500), nullable=True)
+    night_sky_image = db.Column(db.String(500), nullable=True)
+    music_file = db.Column(db.String(500), nullable=True)
     timeline_title = db.Column(db.String(200), default='Zaman Tüneli')
     timeline_subtitle = db.Column(db.String(300), default='Her anı bir ömür')
     future_title = db.Column(db.String(200), default='Gelecek')
@@ -108,14 +108,17 @@ class Photo(db.Model):
     caption = db.Column(db.String(300), nullable=True)
     order = db.Column(db.Integer, default=0)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    cloudinary_url = db.Column(db.String(500), nullable=True)
+    cloudinary_public_id = db.Column(db.String(200), nullable=True)
 
     def to_dict(self):
+        url = self.cloudinary_url or ('/uploads/photos/' + self.filename)
         return {
             'id': self.id,
             'filename': self.filename,
             'caption': self.caption,
             'order': self.order,
-            'url': '/uploads/photos/' + self.filename,
+            'url': url,
         }
 
     def __repr__(self):
@@ -129,13 +132,16 @@ class MusicTrack(db.Model):
     title = db.Column(db.String(200), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    cloudinary_url = db.Column(db.String(500), nullable=True)
+    cloudinary_public_id = db.Column(db.String(200), nullable=True)
 
     def to_dict(self):
+        url = self.cloudinary_url or ('/uploads/music/' + self.filename)
         return {
             'id': self.id,
             'filename': self.filename,
             'title': self.title or self.filename,
-            'url': '/uploads/music/' + self.filename,
+            'url': url,
         }
 
     def __repr__(self):

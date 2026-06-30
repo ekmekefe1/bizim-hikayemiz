@@ -39,6 +39,9 @@ def create_app(config_class=Config):
     login_manager.login_view = 'admin.login'
     login_manager.login_message_category = 'info'
 
+    # Configure Cloudinary
+    _configure_cloudinary(app)
+
     @app.after_request
     def add_cache_headers(response):
         if request.path.startswith('/static/'):
@@ -76,22 +79,171 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         _migrate_schema()
+        _migrate_local_to_cloudinary(app)
         _create_default_admin()
         _create_default_content()
         _create_default_settings()
 
     return app
 
+def _configure_cloudinary(app):
+    cloud_name = app.config.get('CLOUDINARY_CLOUD_NAME', '')
+    api_key = app.config.get('CLOUDINARY_API_KEY', '')
+    api_secret = app.config.get('CLOUDINARY_API_SECRET', '')
+    if cloud_name and api_key and api_secret:
+        import cloudinary
+        cloudinary.config(
+            cloud_name=cloud_name,
+            api_key=api_key,
+            api_secret=api_secret,
+            secure=True
+        )
+        app.logger.info('Cloudinary configured successfully')
+    else:
+        app.logger.warning('Cloudinary not configured — missing credentials')
+
 def _migrate_schema():
-    from app.models import SiteContent
+    from app.models import Photo, MusicTrack
     import sqlalchemy as sa
     try:
         with db.engine.connect() as conn:
-            conn.execute(sa.text('ALTER TABLE site_content ADD COLUMN hero_background VARCHAR(200)'))
+            conn.execute(sa.text('ALTER TABLE photo ADD COLUMN cloudinary_url VARCHAR(500)'))
             conn.commit()
-            app.logger.info('Added hero_background column to site_content')
     except Exception:
         pass
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sa.text('ALTER TABLE photo ADD COLUMN cloudinary_public_id VARCHAR(200)'))
+            conn.commit()
+    except Exception:
+        pass
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sa.text('ALTER TABLE music_track ADD COLUMN cloudinary_url VARCHAR(500)'))
+            conn.commit()
+    except Exception:
+        pass
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sa.text('ALTER TABLE music_track ADD COLUMN cloudinary_public_id VARCHAR(200)'))
+            conn.commit()
+    except Exception:
+        pass
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sa.text('ALTER TABLE site_content ADD COLUMN hero_background VARCHAR(500)'))
+            conn.commit()
+    except Exception:
+        pass
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sa.text('ALTER TABLE site_content ADD COLUMN night_sky_image VARCHAR(500)'))
+            conn.commit()
+    except Exception:
+        pass
+    try:
+        with db.engine.connect() as conn:
+            conn.execute(sa.text('ALTER TABLE site_content ADD COLUMN music_file VARCHAR(500)'))
+            conn.commit()
+    except Exception:
+        pass
+
+def _migrate_local_to_cloudinary(app):
+    import cloudinary
+    import cloudinary.uploader
+    cname = app.config.get('CLOUDINARY_CLOUD_NAME', '')
+    if not cname:
+        return
+
+    from app.models import Photo, MusicTrack, SiteContent
+    upload_base = Path(app.config['UPLOAD_FOLDER'])
+
+    # Migrate Photo
+    for photo in Photo.query.filter(Photo.cloudinary_url.is_(None)).all():
+        local_path = upload_base / 'photos' / photo.filename
+        if local_path.exists():
+            try:
+                result = cloudinary.uploader.upload(
+                    str(local_path),
+                    folder='bizim-hikayemiz/photos',
+                    public_id=Path(photo.filename).stem
+                )
+                url = result['secure_url'].replace('/upload/', '/upload/f_auto,q_auto/')
+                photo.cloudinary_url = url
+                photo.cloudinary_public_id = result['public_id']
+                db.session.commit()
+                app.logger.info(f'Migrated photo {photo.filename} to Cloudinary')
+            except Exception as e:
+                app.logger.warning(f'Failed to migrate photo {photo.filename}: {e}')
+
+    # Migrate MusicTrack
+    for track in MusicTrack.query.filter(MusicTrack.cloudinary_url.is_(None)).all():
+        local_path = upload_base / 'music' / track.filename
+        if local_path.exists():
+            try:
+                result = cloudinary.uploader.upload(
+                    str(local_path),
+                    folder='bizim-hikayemiz/music',
+                    public_id=Path(track.filename).stem,
+                    resource_type='video'  # audio uses video resource type
+                )
+                url = result['secure_url'].replace('/upload/', '/upload/f_auto,q_auto/')
+                track.cloudinary_url = url
+                track.cloudinary_public_id = result['public_id']
+                db.session.commit()
+                app.logger.info(f'Migrated music {track.filename} to Cloudinary')
+            except Exception as e:
+                app.logger.warning(f'Failed to migrate music {track.filename}: {e}')
+
+    # Migrate SiteContent hero_background
+    sc = SiteContent.query.first()
+    if sc:
+        if sc.hero_background and not sc.hero_background.startswith('http'):
+            local_path = upload_base / 'hero' / sc.hero_background
+            if local_path.exists():
+                try:
+                    result = cloudinary.uploader.upload(
+                        str(local_path),
+                        folder='bizim-hikayemiz/hero',
+                        public_id=Path(sc.hero_background).stem
+                    )
+                    sc.hero_background = result['secure_url'].replace('/upload/', '/upload/f_auto,q_auto/')
+                    db.session.commit()
+                    app.logger.info(f'Migrated hero background to Cloudinary')
+                except Exception as e:
+                    app.logger.warning(f'Failed to migrate hero background: {e}')
+
+        if sc.night_sky_image and not sc.night_sky_image.startswith('http'):
+            local_path = upload_base / 'night_sky' / sc.night_sky_image
+            if local_path.exists():
+                try:
+                    result = cloudinary.uploader.upload(
+                        str(local_path),
+                        folder='bizim-hikayemiz/night_sky',
+                        public_id=Path(sc.night_sky_image).stem
+                    )
+                    sc.night_sky_image = result['secure_url'].replace('/upload/', '/upload/f_auto,q_auto/')
+                    db.session.commit()
+                    app.logger.info(f'Migrated night sky image to Cloudinary')
+                except Exception as e:
+                    app.logger.warning(f'Failed to migrate night sky image: {e}')
+
+        if sc.music_file and not sc.music_file.startswith('http'):
+            local_path = upload_base / 'music' / sc.music_file
+            if local_path.exists():
+                try:
+                    result = cloudinary.uploader.upload(
+                        str(local_path),
+                        folder='bizim-hikayemiz/music',
+                        public_id=Path(sc.music_file).stem,
+                        resource_type='video'
+                    )
+                    sc.music_file = result['secure_url'].replace('/upload/', '/upload/f_auto,q_auto/')
+                    db.session.commit()
+                    app.logger.info(f'Migrated site music file to Cloudinary')
+                except Exception as e:
+                    app.logger.warning(f'Failed to migrate site music file: {e}')
+
 
 def _ensure_directories(root_dir, upload_folder):
     dirs = [

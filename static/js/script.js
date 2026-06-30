@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', () => {
         if (!ticking2) {
             requestAnimationFrame(() => {
-                if (window.pageYOffset > 60) {
+                if (window.pageYOffset > 80) {
                     navbar.classList.add('scrolled');
                 } else {
                     navbar.classList.remove('scrolled');
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const div = document.createElement('div');
         div.className = 'music-indicator';
         div.id = 'musicIndicator';
-        div.innerHTML = '<span class="note-icon">🎵</span><span>Müzik açık</span><div class="bar-group"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>';
+        div.innerHTML = '<span class="note-icon">♪</span>';
         document.body.appendChild(div);
         requestAnimationFrame(() => div.classList.add('visible'));
     }
@@ -101,53 +101,26 @@ document.addEventListener('DOMContentLoaded', () => {
     resize();
     window.addEventListener('resize', resize);
 
-    function drawMilkyWay() {
-        const gw = w * 0.9;
-        const cx = w * 0.45;
-        const cy = h * 0.35;
-        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, gw);
-        grad.addColorStop(0, 'rgba(120,100,180,0.03)');
-        grad.addColorStop(0.3, 'rgba(100,80,160,0.025)');
-        grad.addColorStop(0.6, 'rgba(80,60,140,0.015)');
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, gw, gw * 0.35, -0.3, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
     class Star {
         constructor() {
             this.x = Math.random() * w;
             this.y = Math.random() * h;
             const r = Math.random();
-            if (r < 0.55) {
-                this.size = 0.3 + Math.random() * 0.7;
-                this.baseBright = 0.3 + Math.random() * 0.6;
-                this.drift = 0;
+            if (r < 0.6) {
+                this.size = 0.3 + Math.random() * 0.6;
+                this.baseBright = 0.2 + Math.random() * 0.5;
                 this.glow = false;
-                this.twinkleSpeed = 0.01 + Math.random() * 0.03;
-            } else if (r < 0.80) {
-                this.size = 0.8 + Math.random() * 1.0;
-                this.baseBright = 0.5 + Math.random() * 0.5;
-                this.drift = 0.02 + Math.random() * 0.04;
-                this.driftAngle = Math.random() * Math.PI * 2;
+                this.twinkleSpeed = 0.008 + Math.random() * 0.025;
+            } else if (r < 0.85) {
+                this.size = 0.6 + Math.random() * 0.8;
+                this.baseBright = 0.3 + Math.random() * 0.4;
                 this.glow = false;
-                this.twinkleSpeed = 0.008 + Math.random() * 0.02;
-            } else if (r < 0.93) {
-                this.size = 1.5 + Math.random() * 1.2;
-                this.baseBright = 0.7 + Math.random() * 0.3;
-                this.drift = 0.04 + Math.random() * 0.06;
-                this.driftAngle = Math.random() * Math.PI * 2;
-                this.glow = true;
-                this.twinkleSpeed = 0.006 + Math.random() * 0.015;
+                this.twinkleSpeed = 0.006 + Math.random() * 0.02;
             } else {
-                this.size = 2.2 + Math.random() * 1.8;
-                this.baseBright = 0.85 + Math.random() * 0.15;
-                this.drift = 0.05 + Math.random() * 0.08;
-                this.driftAngle = Math.random() * Math.PI * 2;
+                this.size = 1.2 + Math.random() * 1.0;
+                this.baseBright = 0.4 + Math.random() * 0.3;
                 this.glow = true;
-                this.twinkleSpeed = 0.005 + Math.random() * 0.01;
+                this.twinkleSpeed = 0.004 + Math.random() * 0.015;
             }
             this.twinklePhase = Math.random() * Math.PI * 2;
             this.c = this.randomColor();
@@ -156,36 +129,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         randomColor() {
             const r = Math.random();
-            if (r < 0.55) return { r: 255, g: 255, b: 255 };
-            if (r < 0.70) return { r: 210, g: 225, b: 255 };
-            if (r < 0.82) return { r: 255, g: 225, b: 210 };
-            if (r < 0.92) return { r: 200, g: 200, b: 255 };
-            return { r: 255, g: 210, b: 230 };
+            if (r < 0.6) return { r: 240, g: 236, b: 228 };
+            if (r < 0.75) return { r: 200, g: 215, b: 245 };
+            if (r < 0.88) return { r: 245, g: 220, b: 200 };
+            return { r: 220, g: 210, b: 245 };
         }
         update(time) {
             const t = time * this.twinkleSpeed + this.twinklePhase;
-            this.bright = this.baseBright * (0.55 + 0.45 * Math.sin(t));
-            if (this.drift) {
-                this.x = this.ox + Math.sin(time * this.drift + this.driftAngle) * 3;
-                this.y = this.oy + Math.cos(time * this.drift * 0.7 + this.driftAngle) * 2;
-            }
+            this.bright = this.baseBright * (0.5 + 0.5 * Math.sin(t));
         }
         draw() {
-            const a = Math.max(0.04, this.bright);
+            const a = Math.max(0.02, this.bright);
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fillStyle = `rgba(${this.c.r},${this.c.g},${this.c.b},${a})`;
             ctx.fill();
             if (this.glow && this.bright > 0.7) {
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${this.c.r},${this.c.g},${this.c.b},${a * 0.08})`;
+                ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(${this.c.r},${this.c.g},${this.c.b},${a * 0.05})`;
                 ctx.fill();
             }
         }
     }
 
-    const starCount = safeInt(cfg.starCount, 4000);
+    const starCount = Math.min(safeInt(cfg.starCount, 800), 1500);
     const stars = Array.from({ length: starCount }, () => new Star());
 
     class Cloud {
@@ -193,16 +161,16 @@ document.addEventListener('DOMContentLoaded', () => {
             this.reset();
         }
         reset() {
-            this.y = 0.08 + Math.random() * 0.25;
-            this.speed = 0.08 + Math.random() * 0.15;
-            this.opacity = 0.03 + Math.random() * 0.05;
-            this.width = 120 + Math.random() * 250;
-            this.height = 15 + Math.random() * 30;
+            this.y = 0.1 + Math.random() * 0.2;
+            this.speed = 0.05 + Math.random() * 0.1;
+            this.opacity = 0.02 + Math.random() * 0.03;
+            this.width = 100 + Math.random() * 200;
+            this.height = 10 + Math.random() * 20;
             this.x = -this.width;
             this.points = [];
-            const n = 4 + Math.floor(Math.random() * 4);
+            const n = 3 + Math.floor(Math.random() * 3);
             for (let i = 0; i <= n; i++) {
-                this.points.push({ offset: i / n, yOff: (Math.random() - 0.5) * this.height * 0.6 });
+                this.points.push({ offset: i / n, yOff: (Math.random() - 0.5) * this.height * 0.5 });
             }
         }
         update() {
@@ -221,21 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.lineTo(this.x + p.offset * this.width, cy + p.yOff + this.height * 0.5);
             }
             ctx.closePath();
-            ctx.fillStyle = '#fff';
+            ctx.fillStyle = '#f0ece4';
             ctx.fill();
             ctx.restore();
         }
     }
 
-    const clouds = Array.from({ length: 3 }, () => new Cloud());
+    const clouds = Array.from({ length: 2 }, () => new Cloud());
 
     let moonX, moonY, moonRadius;
     let moonClickCount = 0;
 
     function calcMoonPos() {
-        moonX = w * 0.78;
-        moonY = h * 0.14;
-        moonRadius = Math.min(w, h) * 0.065;
+        moonX = w * 0.8;
+        moonY = h * 0.12;
+        moonRadius = Math.min(w, h) * 0.055;
     }
     calcMoonPos();
     window.addEventListener('resize', calcMoonPos);
@@ -243,103 +211,49 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawMoon() {
         const mx = moonX, my = moonY, r = moonRadius;
         const og = ctx.createRadialGradient(mx, my, r * 0.3, mx, my, r * 4);
-        og.addColorStop(0, 'rgba(255,245,210,0.08)');
-        og.addColorStop(0.25, 'rgba(255,245,210,0.04)');
-        og.addColorStop(1, 'rgba(255,245,210,0)');
+        og.addColorStop(0, 'rgba(232,196,196,0.06)');
+        og.addColorStop(0.3, 'rgba(232,196,196,0.03)');
+        og.addColorStop(1, 'rgba(232,196,196,0)');
         ctx.fillStyle = og;
         ctx.beginPath();
         ctx.arc(mx, my, r * 4, 0, Math.PI * 2);
         ctx.fill();
         const mg = ctx.createRadialGradient(mx, my, r * 0.5, mx, my, r * 2);
-        mg.addColorStop(0, 'rgba(255,245,210,0.15)');
-        mg.addColorStop(1, 'rgba(255,245,210,0)');
+        mg.addColorStop(0, 'rgba(232,196,196,0.1)');
+        mg.addColorStop(1, 'rgba(232,196,196,0)');
         ctx.fillStyle = mg;
         ctx.beginPath();
         ctx.arc(mx, my, r * 2, 0, Math.PI * 2);
         ctx.fill();
-        const grad = ctx.createRadialGradient(mx - r * 0.15, my - r * 0.15, 0, mx, my, r);
-        grad.addColorStop(0, '#fffbe8');
-        grad.addColorStop(0.4, '#f5edc0');
-        grad.addColorStop(0.75, '#e8d8a0');
-        grad.addColorStop(0.92, '#d4c488');
-        grad.addColorStop(1, '#b8a868');
+        const grad = ctx.createRadialGradient(mx - r * 0.1, my - r * 0.1, 0, mx, my, r);
+        grad.addColorStop(0, '#f5f0e8');
+        grad.addColorStop(0.4, '#ede4d4');
+        grad.addColorStop(0.75, '#e0d4c0');
+        grad.addColorStop(0.92, '#d4c8b0');
+        grad.addColorStop(1, '#c0b4a0');
         ctx.fillStyle = grad;
         ctx.beginPath();
         ctx.arc(mx, my, r, 0, Math.PI * 2);
         ctx.fill();
-        const sh = ctx.createRadialGradient(mx + r * 0.3, my - r * 0.2, r * 0.1, mx + r * 0.4, my - r * 0.1, r * 1.2);
-        sh.addColorStop(0, 'rgba(0,0,0,0)');
-        sh.addColorStop(0.7, 'rgba(0,0,0,0.03)');
-        sh.addColorStop(1, 'rgba(0,0,0,0.08)');
-        ctx.fillStyle = sh;
-        ctx.beginPath();
-        ctx.arc(mx, my, r, 0, Math.PI * 2);
-        ctx.fill();
         const craters = [
-            { x: 0.18, y: -0.22, r: 0.11 }, { x: -0.25, y: 0.15, r: 0.07 },
-            { x: 0.32, y: 0.28, r: 0.09 }, { x: -0.08, y: -0.35, r: 0.05 },
-            { x: -0.35, y: -0.28, r: 0.06 }, { x: 0.05, y: 0.35, r: 0.04 },
-            { x: 0.40, y: -0.05, r: 0.05 }
+            { x: 0.18, y: -0.2, r: 0.1 }, { x: -0.22, y: 0.15, r: 0.06 },
+            { x: 0.3, y: 0.25, r: 0.08 }, { x: -0.1, y: -0.32, r: 0.04 },
+            { x: -0.32, y: -0.25, r: 0.05 }, { x: 0.06, y: 0.32, r: 0.03 },
+            { x: 0.38, y: -0.04, r: 0.04 }
         ];
         craters.forEach(c => {
             const cx = mx + c.x * r, cy = my + c.y * r, cr = c.r * r;
             ctx.beginPath();
             ctx.arc(cx, cy, cr, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(160,140,80,0.2)';
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(cx - cr * 0.2, cy - cr * 0.2, cr * 0.5, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255,255,220,0.08)';
+            ctx.fillStyle = 'rgba(180,160,120,0.15)';
             ctx.fill();
         });
         ctx.beginPath();
         ctx.arc(mx, my, r, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255,245,210,0.1)';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(240,236,228,0.06)';
+        ctx.lineWidth = 1;
         ctx.stroke();
     }
-
-    class HeartParticle {
-        constructor() {
-            this.reset();
-        }
-        reset() {
-            this.x = Math.random() * w;
-            this.y = h + 60 + Math.random() * 120;
-            this.size = 6 + Math.random() * 16;
-            this.speed = 0.2 + Math.random() * 0.45;
-            this.oscAmp = 12 + Math.random() * 30;
-            this.oscSpeed = 0.006 + Math.random() * 0.012;
-            this.phase = Math.random() * Math.PI * 2;
-            this.opacity = 0.15 + Math.random() * 0.3;
-            this.hue = Math.random() < 0.55 ? 345 : 0;
-        }
-        update() {
-            this.y -= this.speed;
-            this.phase += this.oscSpeed;
-            this.x += Math.sin(this.phase) * 0.35;
-            if (this.y < -80) this.reset();
-        }
-        draw() {
-            const s = this.size;
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.scale(s / 16, s / 16);
-            ctx.globalAlpha = this.opacity;
-            ctx.fillStyle = this.hue === 345 ? '#e94560' : '#ff6b6b';
-            ctx.beginPath();
-            ctx.moveTo(0, 4);
-            ctx.bezierCurveTo(-8, -4, -10, -10, -3, -10);
-            ctx.bezierCurveTo(0, -10, 0, -6, 0, -6);
-            ctx.bezierCurveTo(0, -10, 3, -10, 10, -10);
-            ctx.bezierCurveTo(10, -4, 8, -4, 0, 4);
-            ctx.fill();
-            ctx.restore();
-        }
-    }
-
-    const heartCount = Math.min(3, Math.max(0, Math.floor(safeInt(cfg.heartCount, 3) * 0.3)));
-    const hearts = Array.from({ length: heartCount }, () => new HeartParticle());
 
     class ShootingStar {
         constructor() {
@@ -348,13 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
         reset() {
             this.active = false;
             this.x = 0; this.y = 0;
-            this.len = 80 + Math.random() * 150;
-            this.speed = 10 + Math.random() * 16;
+            this.len = 60 + Math.random() * 100;
+            this.speed = 8 + Math.random() * 12;
             this.angle = Math.PI / 4 + (Math.random() - 0.3) * Math.PI / 4;
             this.opacity = 1;
             this.trail = [];
             this.timer = 0;
-            this.delay = 2000 + Math.random() * 10000;
+            this.delay = 5000 + Math.random() * 15000;
         }
         update(dt) {
             if (!this.active) {
@@ -362,8 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (this.timer >= this.delay) {
                     this.active = true;
                     this.timer = 0;
-                    this.x = 50 + Math.random() * (w * 0.7);
-                    this.y = Math.random() * h * 0.3;
+                    this.x = 50 + Math.random() * (w * 0.6);
+                    this.y = Math.random() * h * 0.25;
                     this.opacity = 1;
                     this.trail = [];
                 }
@@ -373,11 +287,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const dy = Math.sin(this.angle) * this.speed;
             this.x += dx; this.y += dy;
             this.trail.push({ x: this.x, y: this.y });
-            if (this.trail.length > 25) this.trail.shift();
-            this.opacity -= 0.012;
+            if (this.trail.length > 20) this.trail.shift();
+            this.opacity -= 0.015;
             if (this.opacity <= 0 || this.x > w + 100 || this.y > h + 100) {
                 this.active = false;
-                this.delay = 3000 + Math.random() * 12000;
+                this.delay = 5000 + Math.random() * 20000;
                 this.timer = 0;
             }
         }
@@ -385,32 +299,32 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!this.active) return;
             for (let i = 1; i < this.trail.length; i++) {
                 const t = this.trail[i];
-                const o = this.opacity * (i / this.trail.length) * 0.25;
+                const o = this.opacity * (i / this.trail.length) * 0.2;
                 ctx.beginPath();
-                ctx.arc(t.x, t.y, 1.2 * (i / this.trail.length), 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255,255,255,${o})`;
+                ctx.arc(t.x, t.y, 1, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(240,236,228,${o})`;
                 ctx.fill();
             }
             const gx = this.x - Math.cos(this.angle) * this.len;
             const gy = this.y - Math.sin(this.angle) * this.len;
             const grad = ctx.createLinearGradient(this.x, this.y, gx, gy);
-            grad.addColorStop(0, `rgba(255,255,255,${this.opacity})`);
-            grad.addColorStop(0.35, `rgba(255,250,230,${this.opacity * 0.5})`);
-            grad.addColorStop(1, 'rgba(255,255,255,0)');
+            grad.addColorStop(0, `rgba(240,236,228,${this.opacity})`);
+            grad.addColorStop(0.4, `rgba(240,236,228,${this.opacity * 0.4})`);
+            grad.addColorStop(1, 'rgba(240,236,228,0)');
             ctx.beginPath();
             ctx.moveTo(this.x, this.y);
             ctx.lineTo(gx, gy);
             ctx.strokeStyle = grad;
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 2;
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc(this.x, this.y, 2.5, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(255,255,255,${this.opacity})`;
+            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(240,236,228,${this.opacity})`;
             ctx.fill();
         }
     }
 
-    const ssCount = safeInt(cfg.shootingStarCount, 4);
+    const ssCount = safeInt(cfg.shootingStarCount, 1);
     const shootingStars = Array.from({ length: ssCount }, () => new ShootingStar());
 
     let lastT = 0;
@@ -419,19 +333,17 @@ document.addEventListener('DOMContentLoaded', () => {
         lastT = time;
         ctx.clearRect(0, 0, w, h);
         const bg = ctx.createLinearGradient(0, 0, 0, h);
-        bg.addColorStop(0, '#040416');
-        bg.addColorStop(0.3, '#060620');
-        bg.addColorStop(0.6, '#080828');
-        bg.addColorStop(0.85, '#0a0a20');
-        bg.addColorStop(1, '#060612');
+        bg.addColorStop(0, '#050510');
+        bg.addColorStop(0.3, '#080818');
+        bg.addColorStop(0.6, '#0a0a1a');
+        bg.addColorStop(0.85, '#0a0a18');
+        bg.addColorStop(1, '#0a0a12');
         ctx.fillStyle = bg;
         ctx.fillRect(0, 0, w, h);
-        drawMilkyWay();
         stars.forEach(s => { s.update(time); s.draw(); });
         drawMoon();
         clouds.forEach(c => { c.update(); c.draw(); });
         shootingStars.forEach(ss => { ss.update(dt); ss.draw(); });
-        hearts.forEach(h => { h.update(); h.draw(); });
         requestAnimationFrame(animate);
     }
     requestAnimationFrame(animate);
@@ -460,8 +372,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (months < 0) { years--; months += 12; }
         const pad = n => n.toString().padStart(2, '0');
         const hh = pad(now.getHours()), mm = pad(now.getMinutes()), ss = pad(now.getSeconds());
-        const heroTimer = $('heroTimerValue');
-        if (heroTimer) heroTimer.textContent = `${years} Yıl ${months} Ay ${days} Gün · ${hh}:${mm}:${ss}`;
         const ey = $('years'); if (ey) ey.textContent = years;
         const em = $('months'); if (em) em.textContent = months;
         const ed = $('days'); if (ed) ed.textContent = days;
@@ -497,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (envelopeOpen || typewriterRunning) return;
         envelope.classList.add('open');
         envelopeOpen = true;
-        startTypewriter(letterParagraphs, letterBody, 55);
+        startTypewriter(letterParagraphs, letterBody, 50);
     }
 
     if (envelope) {
@@ -563,38 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (easterModal) easterModal.addEventListener('click', (e) => { if (e.target === easterModal) easterModal.classList.remove('active'); });
 
     // =============================================
-    // 6. HEART BURST
-    // =============================================
-    document.addEventListener('click', (e) => {
-        const tag = e.target.tagName;
-        if (tag === 'BUTTON' || tag === 'A' || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' ||
-            e.target.closest('.modal-overlay') || e.target.closest('.envelope') ||
-            e.target.closest('.lightbox') || e.target.closest('.gallery-frame')) return;
-        burstHearts(e.clientX, e.clientY);
-    });
-
-    function burstHearts(x, y) {
-        const count = 3 + Math.floor(Math.random() * 4);
-        const symbols = ['❤️', '🤍'];
-        for (let i = 0; i < count; i++) {
-            const el = document.createElement('span');
-            el.className = 'heart-particle';
-            el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 60 + Math.random() * 120;
-            el.style.left = x + 'px';
-            el.style.top = y + 'px';
-            el.style.setProperty('--tx', (Math.cos(angle) * dist) + 'px');
-            el.style.setProperty('--ty', (Math.sin(angle) * dist - 30) + 'px');
-            el.style.fontSize = (10 + Math.random() * 16) + 'px';
-            el.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 1600);
-        }
-    }
-
-    // =============================================
-    // 7. PHOTO GALLERY + LIGHTBOX
+    // 6. PHOTO GALLERY + LIGHTBOX
     // =============================================
     const galleryGrid = $('galleryGrid');
     const lightbox = $('lightbox');
@@ -604,6 +483,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightboxNext = $('lightbox-next');
     let galleryImages = [];
     let currentImageIndex = 0;
+
+    function isCloudinaryUrl(url) {
+        return url && url.indexOf('cloudinary') !== -1;
+    }
+
+    function cloudinarySrcset(url) {
+        if (!isCloudinaryUrl(url)) return '';
+        const base = url.replace('/upload/', '/upload/');
+        const widths = [400, 800, 1200];
+        return widths.map(w => {
+            const src = url.replace('/upload/', `/upload/w_${w/2},f_auto,q_auto/`);
+            return `${src} ${w}w`;
+        }).join(', ');
+    }
+
+    function cloudinarySrc(url, width) {
+        if (!isCloudinaryUrl(url)) return url;
+        if (!width) return url;
+        return url.replace('/upload/', `/upload/w_${width},f_auto,q_auto/`);
+    }
 
     async function loadGallery() {
         try {
@@ -621,15 +520,23 @@ document.addEventListener('DOMContentLoaded', () => {
         galleryImages = photos;
         if (photos.length === 0) {
             const frame = document.createElement('div');
-            frame.className = 'gallery-frame glass-card reveal empty-frame';
-            frame.innerHTML = '<div class="gallery-placeholder"><span class="placeholder-icon">❤️</span><span class="placeholder-text">Fotoğraflarını Bekliyor</span></div>';
+            frame.className = 'gallery-frame reveal empty-frame';
+            frame.innerHTML = '<div class="gallery-placeholder"><span class="placeholder-text">Fotoğraflarını Bekliyor</span></div>';
             galleryGrid.appendChild(frame);
             return;
         }
         photos.forEach((photo, idx) => {
             const frame = document.createElement('div');
-            frame.className = 'gallery-frame glass-card reveal';
-            frame.innerHTML = `<img src="${photo.url}" alt="${photo.caption || 'Fotoğraf ' + (idx + 1)}" loading="lazy">`;
+            frame.className = 'gallery-frame reveal';
+            const src = photo.cloudinary_url || photo.url;
+            const srcset = cloudinarySrcset(src);
+            const img = document.createElement('img');
+            img.src = cloudinarySrc(src, 600);
+            img.alt = photo.caption || 'Fotoğraf ' + (idx + 1);
+            img.loading = 'lazy';
+            if (srcset) img.srcset = srcset;
+            img.sizes = '(max-width: 480px) 100vw, (max-width: 768px) 50vw, 33vw';
+            frame.appendChild(img);
             frame.addEventListener('click', () => openLightbox(idx));
             galleryGrid.appendChild(frame);
         });
@@ -638,7 +545,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function openLightbox(idx) {
         if (!lightbox || !lightboxImg) return;
         currentImageIndex = idx;
-        lightboxImg.src = galleryImages[idx].url;
+        const photo = galleryImages[idx];
+        const src = photo.cloudinary_url || photo.url;
+        lightboxImg.src = cloudinarySrc(src, 1200);
+        lightboxImg.srcset = cloudinarySrcset(src);
+        lightboxImg.sizes = '85vw';
         lightbox.classList.add('active');
         document.body.style.overflow = 'hidden';
         updateLightboxNav();
@@ -653,13 +564,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function prevImage() {
         if (galleryImages.length <= 1) return;
         currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
-        lightboxImg.src = galleryImages[currentImageIndex].url;
+        const photo = galleryImages[currentImageIndex];
+        const src = photo.cloudinary_url || photo.url;
+        lightboxImg.src = cloudinarySrc(src, 1200);
+        lightboxImg.srcset = cloudinarySrcset(src);
     }
 
     function nextImage() {
         if (galleryImages.length <= 1) return;
         currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
-        lightboxImg.src = galleryImages[currentImageIndex].url;
+        const photo = galleryImages[currentImageIndex];
+        const src = photo.cloudinary_url || photo.url;
+        lightboxImg.src = cloudinarySrc(src, 1200);
+        lightboxImg.srcset = cloudinarySrcset(src);
     }
 
     function updateLightboxNav() {
@@ -683,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGallery();
 
     // =============================================
-    // 8. SCROLL REVEAL
+    // 7. SCROLL REVEAL
     // =============================================
     const revealEls = qsa('.reveal');
     const obs = new IntersectionObserver((entries) => {
@@ -693,11 +610,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 obs.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.08, rootMargin: '0px 0px -60px 0px' });
+    }, { threshold: 0.08, rootMargin: '0px 0px -80px 0px' });
     revealEls.forEach(el => obs.observe(el));
 
     // =============================================
-    // 9. HERO PARALLAX (subtle)
+    // 8. HERO PARALLAX (very subtle)
     // =============================================
     let ticking = false;
     window.addEventListener('scroll', () => {
@@ -709,8 +626,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const content = qs('.hero-content');
                     if (content) {
                         const pct = sy / heroSection.offsetHeight;
-                        content.style.transform = `translateY(${pct * 30}px)`;
-                        content.style.opacity = 1 - pct * 0.4;
+                        content.style.transform = `translateY(${pct * 20}px)`;
+                        content.style.opacity = 1 - pct * 0.5;
                     }
                 }
                 ticking = false;
@@ -718,35 +635,4 @@ document.addEventListener('DOMContentLoaded', () => {
             ticking = true;
         }
     });
-
-    // =============================================
-    // 10. FLOATING DECORATIVE (minimal)
-    // =============================================
-    const floatingContainer = $('floating-elements');
-    if (floatingContainer) {
-        const fhCount = Math.min(2, Math.max(1, safeInt(cfg.floatingHearts, 3)));
-        const frCount = Math.min(1, safeInt(cfg.floatingRoses, 1));
-
-        for (let i = 0; i < fhCount; i++) {
-            const el = document.createElement('span');
-            el.className = 'floating-heart';
-            el.textContent = '🤍';
-            el.style.left = (20 + i * 50) + '%';
-            el.style.fontSize = '14px';
-            el.style.animationDuration = (25 + i * 10) + 's';
-            el.style.animationDelay = (i * 8) + 's';
-            floatingContainer.appendChild(el);
-        }
-
-        for (let i = 0; i < frCount; i++) {
-            const el = document.createElement('span');
-            el.className = 'floating-rose';
-            el.textContent = '🤍';
-            el.style.left = '50%';
-            el.style.fontSize = '16px';
-            el.style.animationDuration = '30s';
-            el.style.animationDelay = '4s';
-            floatingContainer.appendChild(el);
-        }
-    }
 });

@@ -1,6 +1,7 @@
 import os
 import logging
 from datetime import datetime
+from pathlib import Path
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
@@ -61,6 +62,55 @@ def ensure_upload_dir(subdir):
     if not os.path.exists(path):
         os.makedirs(path)
     return path
+
+def cloudinary_configured():
+    return bool(current_app.config.get('CLOUDINARY_CLOUD_NAME'))
+
+def _cloudinary_upload(file_path, folder, public_id_base, resource_type='image'):
+    """Upload a local file to Cloudinary. Returns (secure_url, public_id) or (None, None) on failure."""
+    if not cloudinary_configured():
+        return None, None
+    if not os.path.exists(file_path):
+        return None, None
+    try:
+        import cloudinary.uploader
+        result = cloudinary.uploader.upload(
+            file_path,
+            folder=folder,
+            public_id=public_id_base,
+            resource_type=resource_type
+        )
+        url = result['secure_url']
+        # Enable automatic format selection and quality optimization
+        url = url.replace('/upload/', '/upload/f_auto,q_auto/')
+        return url, result['public_id']
+    except Exception as e:
+        logger.error(f'Cloudinary upload failed: {e}')
+        flash(f'Cloudinary yükleme hatası: {e}', 'error')
+        return None, None
+
+def _cloudinary_destroy(public_id, resource_type='image'):
+    """Delete a file from Cloudinary by public_id."""
+    if not cloudinary_configured() or not public_id:
+        return
+    try:
+        import cloudinary.uploader
+        cloudinary.uploader.destroy(public_id, resource_type=resource_type)
+    except Exception as e:
+        logger.warning(f'Cloudinary delete failed for {public_id}: {e}')
+
+def _public_id_from_url(url):
+    """Extract Cloudinary public_id (with folder prefix) from a secure_url."""
+    if not url or '/upload/' not in url:
+        return None
+    parts = url.split('/upload/', 1)[1]
+    segments = parts.split('/')
+    if segments and segments[0].startswith('v') and segments[0][1:].isdigit():
+        segments = segments[1:]
+    public_id = '/'.join(segments)
+    if '.' in public_id:
+        public_id = public_id.rsplit('.', 1)[0]
+    return public_id
 
 # ---- Auth ----
 
@@ -224,16 +274,26 @@ def photos():
         file = request.files['photo']
         if file and file.filename:
             if validate_file_content(file, current_app.config.get('ALLOWED_PHOTO_EXTENSIONS', PHOTO_EXTENSIONS)):
-                filename = secure_filename(f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{file.filename}")
+                ts = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+                safe_name = secure_filename(file.filename)
+                filename = secure_filename(f"{ts}_{safe_name}")
                 upload_dir = ensure_upload_dir('photos')
                 filepath = os.path.join(upload_dir, filename)
                 file.save(filepath)
 
                 caption = request.form.get('caption', '')
-                photo = Photo(filename=filename, caption=caption)
+                c_url, c_pid = _cloudinary_upload(filepath, 'bizim-hikayemiz/photos', f'{ts}_{Path(safe_name).stem}')
+
+                if c_url and c_pid:
+                    photo = Photo(filename=c_pid, caption=caption, cloudinary_url=c_url, cloudinary_public_id=c_pid)
+                    os.remove(filepath)
+                    flash('Fotoğraf Cloudinary\'e yüklendi.', 'success')
+                else:
+                    photo = Photo(filename=filename, caption=caption)
+                    flash('Fotoğraf yüklendi (yerel depolama).', 'success')
+
                 db.session.add(photo)
                 db.session.commit()
-                flash('Fotoğraf yüklendi.', 'success')
                 logger.info(f'Photo uploaded by {current_user.username}: {filename}')
             else:
                 flash('Geçersiz dosya türü.', 'error')
@@ -248,6 +308,10 @@ def photos():
 @login_required
 def photo_delete(id):
     photo = Photo.query.get_or_404(id)
+    # Delete from Cloudinary if it was uploaded there
+    if photo.cloudinary_public_id:
+        _cloudinary_destroy(photo.cloudinary_public_id)
+    # Also remove from local disk if present
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'photos', photo.filename)
     if os.path.exists(filepath):
         os.remove(filepath)
@@ -266,16 +330,26 @@ def music():
         file = request.files['music_file']
         if file and file.filename:
             if validate_file_content(file, current_app.config.get('ALLOWED_MUSIC_EXTENSIONS', MUSIC_EXTENSIONS)):
-                filename = secure_filename(f"{datetime.utcnow().strftime('%Y%m%d%H%M%S')}_{file.filename}")
+                ts = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+                safe_name = secure_filename(file.filename)
+                filename = secure_filename(f"{ts}_{safe_name}")
                 upload_dir = ensure_upload_dir('music')
                 filepath = os.path.join(upload_dir, filename)
                 file.save(filepath)
 
-                title = request.form.get('title', file.filename)
-                track = MusicTrack(filename=filename, title=title)
+                title = request.form.get('title', safe_name)
+                c_url, c_pid = _cloudinary_upload(filepath, 'bizim-hikayemiz/music', f'{ts}_{Path(safe_name).stem}', resource_type='video')
+
+                if c_url and c_pid:
+                    track = MusicTrack(filename=c_pid, title=title, cloudinary_url=c_url, cloudinary_public_id=c_pid)
+                    os.remove(filepath)
+                    flash('Müzik Cloudinary\'e yüklendi.', 'success')
+                else:
+                    track = MusicTrack(filename=filename, title=title)
+                    flash('Müzik yüklendi (yerel depolama).', 'success')
+
                 db.session.add(track)
                 db.session.commit()
-                flash('Müzik yüklendi.', 'success')
                 logger.info(f'Music uploaded by {current_user.username}: {filename}')
             else:
                 flash('Geçersiz dosya türü.', 'error')
@@ -290,6 +364,8 @@ def music():
 @login_required
 def music_delete(id):
     track = MusicTrack.query.get_or_404(id)
+    if track.cloudinary_public_id:
+        _cloudinary_destroy(track.cloudinary_public_id, resource_type='video')
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'music', track.filename)
     if os.path.exists(filepath):
         os.remove(filepath)
@@ -325,14 +401,29 @@ def night_sky():
         file = request.files['night_sky_image']
         if file and file.filename:
             if validate_file_content(file, current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', PHOTO_EXTENSIONS)):
-                filename = secure_filename(f"night_sky_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.', 1)[1].lower()}")
+                ts = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"night_sky_{ts}.{ext}")
                 upload_dir = ensure_upload_dir('night_sky')
                 filepath = os.path.join(upload_dir, filename)
                 file.save(filepath)
-                sc.night_sky_image = filename
+
+                c_url, _ = _cloudinary_upload(filepath, 'bizim-hikayemiz/night_sky', f'night_sky_{ts}')
+
+                if c_url:
+                    if sc.night_sky_image and sc.night_sky_image.startswith('http'):
+                        old_pid = _public_id_from_url(sc.night_sky_image)
+                        if old_pid:
+                            _cloudinary_destroy(old_pid)
+                    sc.night_sky_image = c_url
+                    os.remove(filepath)
+                    flash('Gece gökyüzü görseli Cloudinary\'e yüklendi.', 'success')
+                else:
+                    sc.night_sky_image = filename
+                    flash('Gece gökyüzü görseli yüklendi (yerel depolama).', 'success')
+
                 db.session.commit()
-                flash('Gece gökyüzü görseli yüklendi.', 'success')
-                logger.info(f'Night sky image uploaded by {current_user.username}: {filename}')
+                logger.info(f'Night sky image uploaded by {current_user.username}')
             else:
                 flash('Geçersiz dosya türü.', 'error')
         else:
@@ -346,9 +437,14 @@ def night_sky():
 def night_sky_delete():
     sc = SiteContent.query.first()
     if sc and sc.night_sky_image:
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'night_sky', sc.night_sky_image)
-        if os.path.exists(filepath):
-            os.remove(filepath)
+        if sc.night_sky_image.startswith('http'):
+            old_pid = _public_id_from_url(sc.night_sky_image)
+            if old_pid:
+                _cloudinary_destroy(old_pid)
+        else:
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'night_sky', sc.night_sky_image)
+            if os.path.exists(filepath):
+                os.remove(filepath)
         sc.night_sky_image = None
         db.session.commit()
         flash('Gece gökyüzü görseli kaldırıldı.', 'info')
@@ -370,14 +466,29 @@ def hero_background():
         file = request.files['hero_background']
         if file and file.filename:
             if validate_file_content(file, current_app.config.get('ALLOWED_IMAGE_EXTENSIONS', PHOTO_EXTENSIONS)):
-                filename = secure_filename(f"hero_{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.{file.filename.rsplit('.', 1)[1].lower()}")
+                ts = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"hero_{ts}.{ext}")
                 upload_dir = ensure_upload_dir('hero')
                 filepath = os.path.join(upload_dir, filename)
                 file.save(filepath)
-                sc.hero_background = filename
+
+                c_url, _ = _cloudinary_upload(filepath, 'bizim-hikayemiz/hero', f'hero_{ts}')
+
+                if c_url:
+                    if sc.hero_background and sc.hero_background.startswith('http'):
+                        old_pid = _public_id_from_url(sc.hero_background)
+                        if old_pid:
+                            _cloudinary_destroy(old_pid)
+                    sc.hero_background = c_url
+                    os.remove(filepath)
+                    flash('Hero görseli Cloudinary\'e yüklendi.', 'success')
+                else:
+                    sc.hero_background = filename
+                    flash('Hero görseli yüklendi (yerel depolama).', 'success')
+
                 db.session.commit()
-                flash('Hero görseli yüklendi.', 'success')
-                logger.info(f'Hero background uploaded by {current_user.username}: {filename}')
+                logger.info(f'Hero background uploaded by {current_user.username}')
             else:
                 flash('Geçersiz dosya türü.', 'error')
         else:
@@ -391,9 +502,14 @@ def hero_background():
 def hero_background_delete():
     sc = SiteContent.query.first()
     if sc and sc.hero_background:
-        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'hero', sc.hero_background)
-        if os.path.exists(filepath):
-            os.remove(filepath)
+        if sc.hero_background.startswith('http'):
+            old_pid = _public_id_from_url(sc.hero_background)
+            if old_pid:
+                _cloudinary_destroy(old_pid)
+        else:
+            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], 'hero', sc.hero_background)
+            if os.path.exists(filepath):
+                os.remove(filepath)
         sc.hero_background = None
         db.session.commit()
         flash('Hero görseli kaldırıldı.', 'info')

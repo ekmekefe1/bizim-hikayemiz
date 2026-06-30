@@ -4,7 +4,7 @@
 <div class="night-sky-preview">
     <h3>Mevcut Görsel</h3>
     {% if content and content.night_sky_image %}
-    <img src="{{ url_for('main.uploaded_file', filename='night_sky/' + content.night_sky_image) }}" alt="Gece Gökyüzü" class="preview-image">
+    <img src="{% if content.night_sky_image.startswith('http') %}{{ content.night_sky_image }}{% else %}{{ url_for('main.uploaded_file', filename='night_sky/' + content.night_sky_image) }}{% endif %}" alt="Gece Gökyüzü" class="preview-image">
     <form method="POST" action="{{ url_for('admin.night_sky_delete') }}" style="margin-top:12px;">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button type="submit" class="btn btn-danger" onclick="return confirm('Görseli kaldırmak istediğinize emin misiniz?')">Görseli Kaldır</button>
