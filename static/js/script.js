@@ -10,46 +10,233 @@ document.addEventListener('DOMContentLoaded', () => {
         return Number.isFinite(n) ? n : def;
     }
 
-    $('year').textContent = new Date().getFullYear();
-
     // =============================================
-    // 0. NAVBAR
+    // 0. PREVENT SCROLL & WHEEL
     // =============================================
-    const navbar = $('navbar');
-    const navbarToggle = $('navbarToggle');
-    const navbarLinks = $('navbarLinks');
-
-    navbarToggle.addEventListener('click', () => {
-        navbarToggle.classList.toggle('active');
-        navbarLinks.classList.toggle('open');
-        navbarToggle.setAttribute('aria-expanded', navbarLinks.classList.contains('open'));
-    });
-
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            navbarLinks.classList.remove('open');
-            navbarToggle.classList.remove('active');
-            navbarToggle.setAttribute('aria-expanded', 'false');
-        });
-    });
-
-    let ticking2 = false;
-    window.addEventListener('scroll', () => {
-        if (!ticking2) {
-            requestAnimationFrame(() => {
-                if (window.pageYOffset > 80) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-                ticking2 = false;
-            });
-            ticking2 = true;
+    document.addEventListener('wheel', e => e.preventDefault(), { passive: false });
+    document.addEventListener('touchmove', e => {
+        if (!e.target.closest('.view.active') && !e.target.closest('.letter-paper') &&
+            !e.target.closest('.gallery-grid') && !e.target.closest('.drawer') &&
+            !e.target.closest('.lightbox-overlay.active')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'PageUp' || e.key === 'PageDown' || e.key === 'Home' || e.key === 'End') {
+            e.preventDefault();
         }
     });
 
     // =============================================
-    // 1. MUSIC MODAL + API
+    // 1. VIEW NAVIGATION
+    // =============================================
+    const views = qsa('.view');
+    const drawerLinks = qsa('.drawer-link');
+    const drawer = $('drawer');
+    const drawerBackdrop = $('drawerBackdrop');
+    const menuToggle = $('menuToggle');
+    const drawerClose = $('drawerClose');
+    let currentView = 'counter';
+
+    function switchView(viewId) {
+        if (viewId === currentView) return;
+        views.forEach(v => v.classList.remove('active'));
+        const target = $('view-' + viewId);
+        if (target) {
+            target.classList.add('active');
+            currentView = viewId;
+        }
+        drawerLinks.forEach(l => {
+            l.classList.toggle('active', l.dataset.view === viewId);
+        });
+        closeDrawer();
+    }
+
+    drawerLinks.forEach(link => {
+        link.addEventListener('click', e => {
+            e.preventDefault();
+            const view = link.dataset.view;
+            switchView(view);
+            history.replaceState(null, '', '#' + view);
+        });
+    });
+
+    // Handle hash on load
+    const hash = window.location.hash.replace('#', '');
+    if (hash && $('view-' + hash)) {
+        switchView(hash);
+    }
+
+    // =============================================
+    // 2. DRAWER
+    // =============================================
+    function openDrawer() {
+        drawer.classList.add('active');
+        drawerBackdrop.classList.add('active');
+    }
+
+    function closeDrawer() {
+        drawer.classList.remove('active');
+        drawerBackdrop.classList.remove('active');
+    }
+
+    menuToggle.addEventListener('click', openDrawer);
+    drawerClose.addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && drawer.classList.contains('active')) {
+            closeDrawer();
+        }
+    });
+
+    // =============================================
+    // 3. SUBTLE STARS CANVAS
+    // =============================================
+    const canvas = $('stars-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let w, h;
+
+        function resize() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        const count = Math.min(safeInt(cfg.starCount, 150), 300);
+        const stars = Array.from({ length: count }, () => ({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            size: 0.3 + Math.random() * 0.5,
+            bright: 0.1 + Math.random() * 0.2,
+            speed: 0.005 + Math.random() * 0.015,
+            phase: Math.random() * Math.PI * 2
+        }));
+
+        class ShootingStar {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.active = false;
+                this.x = 0; this.y = 0;
+                this.speed = 6 + Math.random() * 8;
+                this.angle = Math.PI / 4 + (Math.random() - 0.3) * Math.PI / 4;
+                this.opacity = 1;
+                this.timer = 0;
+                this.delay = 8000 + Math.random() * 20000;
+            }
+            update(dt) {
+                if (!this.active) {
+                    this.timer += dt;
+                    if (this.timer >= this.delay) {
+                        this.active = true;
+                        this.timer = 0;
+                        this.x = 50 + Math.random() * (w * 0.5);
+                        this.y = Math.random() * h * 0.2;
+                        this.opacity = 1;
+                    }
+                    return;
+                }
+                const dx = Math.cos(this.angle) * this.speed;
+                const dy = Math.sin(this.angle) * this.speed;
+                this.x += dx; this.y += dy;
+                this.opacity -= 0.02;
+                if (this.opacity <= 0 || this.x > w + 100 || this.y > h + 100) {
+                    this.active = false;
+                    this.delay = 10000 + Math.random() * 30000;
+                    this.timer = 0;
+                }
+            }
+            draw() {
+                if (!this.active) return;
+                const len = 40 + Math.random() * 60;
+                const gx = this.x - Math.cos(this.angle) * len;
+                const gy = this.y - Math.sin(this.angle) * len;
+                const grad = ctx.createLinearGradient(this.x, this.y, gx, gy);
+                grad.addColorStop(0, `rgba(247,232,228,${this.opacity})`);
+                grad.addColorStop(1, 'rgba(247,232,228,0)');
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(gx, gy);
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
+
+        const shootingStars = Array.from({ length: safeInt(cfg.shootingStarCount, 1) }, () => new ShootingStar());
+
+        let lastT = 0;
+        function animate(time) {
+            const dt = lastT ? Math.min(time - lastT, 50) : 16;
+            lastT = time;
+            ctx.clearRect(0, 0, w, h);
+            stars.forEach(s => {
+                const t = time * s.speed + s.phase;
+                const a = s.bright * (0.5 + 0.5 * Math.sin(t));
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(247,232,228,${Math.max(0.02, a)})`;
+                ctx.fill();
+            });
+            shootingStars.forEach(ss => { ss.update(dt); ss.draw(); });
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+
+        // =============================================
+        // 4. EASTER EGG (moon click)
+        // =============================================
+        let moonClickCount = 0;
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const cx = e.clientX - rect.left;
+            const cy = e.clientY - rect.top;
+            const moonX = w * 0.8, moonY = h * 0.1, moonR = Math.min(w, h) * 0.05;
+            const dx = cx - moonX, dy = cy - moonY;
+            if (Math.sqrt(dx * dx + dy * dy) < moonR * 2) {
+                moonClickCount++;
+                if (moonClickCount >= 5) {
+                    moonClickCount = 0;
+                    const em = $('easter-modal');
+                    if (em) em.classList.add('active');
+                }
+            }
+        });
+    }
+
+    // =============================================
+    // 5. RELATIONSHIP TIMER
+    // =============================================
+    function parseRelationshipDate() {
+        return new Date(2023, 0, 23);
+    }
+
+    const relationshipStart = parseRelationshipDate();
+
+    function updateTimers() {
+        const now = new Date();
+        let years = now.getFullYear() - relationshipStart.getFullYear();
+        let months = now.getMonth() - relationshipStart.getMonth();
+        let days = now.getDate() - relationshipStart.getDate();
+        if (days < 0) { months--; const prev = new Date(now.getFullYear(), now.getMonth(), 0); days += prev.getDate(); }
+        if (months < 0) { years--; months += 12; }
+        const pad = n => n.toString().padStart(2, '0');
+        const hh = pad(now.getHours()), mm = pad(now.getMinutes()), ss = pad(now.getSeconds());
+        const ey = $('years'); if (ey) ey.textContent = years;
+        const em = $('months'); if (em) em.textContent = months;
+        const ed = $('days'); if (ed) ed.textContent = days;
+        const eh = $('hours'); if (eh) eh.textContent = hh;
+        const emm = $('minutes'); if (emm) emm.textContent = mm;
+        const es = $('seconds'); if (es) es.textContent = ss;
+    }
+    updateTimers();
+    setInterval(updateTimers, 1000);
+
+    // =============================================
+    // 6. MUSIC MODAL
     // =============================================
     const musicModal = $('music-modal');
     const musicYes = $('music-yes');
@@ -80,310 +267,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const div = document.createElement('div');
         div.className = 'music-indicator';
         div.id = 'musicIndicator';
-        div.innerHTML = '<span class="note-icon">♪</span>';
+        div.innerHTML = '<span class="note-icon">♪</span> Müzik açık';
         document.body.appendChild(div);
         requestAnimationFrame(() => div.classList.add('visible'));
     }
 
-    setTimeout(showMusicModal, 1500);
+    setTimeout(showMusicModal, 1200);
 
     // =============================================
-    // 2. CANVAS STARFIELD
-    // =============================================
-    const canvas = $('starfield');
-    const ctx = canvas.getContext('2d');
-    let w, h;
-
-    function resize() {
-        w = canvas.width = window.innerWidth;
-        h = canvas.height = window.innerHeight;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    class Star {
-        constructor() {
-            this.x = Math.random() * w;
-            this.y = Math.random() * h;
-            const r = Math.random();
-            if (r < 0.6) {
-                this.size = 0.3 + Math.random() * 0.6;
-                this.baseBright = 0.2 + Math.random() * 0.5;
-                this.glow = false;
-                this.twinkleSpeed = 0.008 + Math.random() * 0.025;
-            } else if (r < 0.85) {
-                this.size = 0.6 + Math.random() * 0.8;
-                this.baseBright = 0.3 + Math.random() * 0.4;
-                this.glow = false;
-                this.twinkleSpeed = 0.006 + Math.random() * 0.02;
-            } else {
-                this.size = 1.2 + Math.random() * 1.0;
-                this.baseBright = 0.4 + Math.random() * 0.3;
-                this.glow = true;
-                this.twinkleSpeed = 0.004 + Math.random() * 0.015;
-            }
-            this.twinklePhase = Math.random() * Math.PI * 2;
-            this.c = this.randomColor();
-            this.ox = this.x;
-            this.oy = this.y;
-        }
-        randomColor() {
-            const r = Math.random();
-            if (r < 0.6) return { r: 240, g: 236, b: 228 };
-            if (r < 0.75) return { r: 200, g: 215, b: 245 };
-            if (r < 0.88) return { r: 245, g: 220, b: 200 };
-            return { r: 220, g: 210, b: 245 };
-        }
-        update(time) {
-            const t = time * this.twinkleSpeed + this.twinklePhase;
-            this.bright = this.baseBright * (0.5 + 0.5 * Math.sin(t));
-        }
-        draw() {
-            const a = Math.max(0.02, this.bright);
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${this.c.r},${this.c.g},${this.c.b},${a})`;
-            ctx.fill();
-            if (this.glow && this.bright > 0.7) {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(${this.c.r},${this.c.g},${this.c.b},${a * 0.05})`;
-                ctx.fill();
-            }
-        }
-    }
-
-    const starCount = Math.min(safeInt(cfg.starCount, 800), 1500);
-    const stars = Array.from({ length: starCount }, () => new Star());
-
-    class Cloud {
-        constructor() {
-            this.reset();
-        }
-        reset() {
-            this.y = 0.1 + Math.random() * 0.2;
-            this.speed = 0.05 + Math.random() * 0.1;
-            this.opacity = 0.02 + Math.random() * 0.03;
-            this.width = 100 + Math.random() * 200;
-            this.height = 10 + Math.random() * 20;
-            this.x = -this.width;
-            this.points = [];
-            const n = 3 + Math.floor(Math.random() * 3);
-            for (let i = 0; i <= n; i++) {
-                this.points.push({ offset: i / n, yOff: (Math.random() - 0.5) * this.height * 0.5 });
-            }
-        }
-        update() {
-            this.x += this.speed;
-            if (this.x > w + this.width) this.reset();
-        }
-        draw() {
-            const cy = this.y * h;
-            ctx.save();
-            ctx.globalAlpha = this.opacity;
-            ctx.beginPath();
-            ctx.moveTo(this.x, cy);
-            for (const p of this.points) ctx.lineTo(this.x + p.offset * this.width, cy + p.yOff);
-            for (let i = this.points.length - 1; i >= 0; i--) {
-                const p = this.points[i];
-                ctx.lineTo(this.x + p.offset * this.width, cy + p.yOff + this.height * 0.5);
-            }
-            ctx.closePath();
-            ctx.fillStyle = '#f0ece4';
-            ctx.fill();
-            ctx.restore();
-        }
-    }
-
-    const clouds = Array.from({ length: 2 }, () => new Cloud());
-
-    let moonX, moonY, moonRadius;
-    let moonClickCount = 0;
-
-    function calcMoonPos() {
-        moonX = w * 0.8;
-        moonY = h * 0.12;
-        moonRadius = Math.min(w, h) * 0.055;
-    }
-    calcMoonPos();
-    window.addEventListener('resize', calcMoonPos);
-
-    function drawMoon() {
-        const mx = moonX, my = moonY, r = moonRadius;
-        const og = ctx.createRadialGradient(mx, my, r * 0.3, mx, my, r * 4);
-        og.addColorStop(0, 'rgba(232,196,196,0.06)');
-        og.addColorStop(0.3, 'rgba(232,196,196,0.03)');
-        og.addColorStop(1, 'rgba(232,196,196,0)');
-        ctx.fillStyle = og;
-        ctx.beginPath();
-        ctx.arc(mx, my, r * 4, 0, Math.PI * 2);
-        ctx.fill();
-        const mg = ctx.createRadialGradient(mx, my, r * 0.5, mx, my, r * 2);
-        mg.addColorStop(0, 'rgba(232,196,196,0.1)');
-        mg.addColorStop(1, 'rgba(232,196,196,0)');
-        ctx.fillStyle = mg;
-        ctx.beginPath();
-        ctx.arc(mx, my, r * 2, 0, Math.PI * 2);
-        ctx.fill();
-        const grad = ctx.createRadialGradient(mx - r * 0.1, my - r * 0.1, 0, mx, my, r);
-        grad.addColorStop(0, '#f5f0e8');
-        grad.addColorStop(0.4, '#ede4d4');
-        grad.addColorStop(0.75, '#e0d4c0');
-        grad.addColorStop(0.92, '#d4c8b0');
-        grad.addColorStop(1, '#c0b4a0');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(mx, my, r, 0, Math.PI * 2);
-        ctx.fill();
-        const craters = [
-            { x: 0.18, y: -0.2, r: 0.1 }, { x: -0.22, y: 0.15, r: 0.06 },
-            { x: 0.3, y: 0.25, r: 0.08 }, { x: -0.1, y: -0.32, r: 0.04 },
-            { x: -0.32, y: -0.25, r: 0.05 }, { x: 0.06, y: 0.32, r: 0.03 },
-            { x: 0.38, y: -0.04, r: 0.04 }
-        ];
-        craters.forEach(c => {
-            const cx = mx + c.x * r, cy = my + c.y * r, cr = c.r * r;
-            ctx.beginPath();
-            ctx.arc(cx, cy, cr, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(180,160,120,0.15)';
-            ctx.fill();
-        });
-        ctx.beginPath();
-        ctx.arc(mx, my, r, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(240,236,228,0.06)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    }
-
-    class ShootingStar {
-        constructor() {
-            this.reset();
-        }
-        reset() {
-            this.active = false;
-            this.x = 0; this.y = 0;
-            this.len = 60 + Math.random() * 100;
-            this.speed = 8 + Math.random() * 12;
-            this.angle = Math.PI / 4 + (Math.random() - 0.3) * Math.PI / 4;
-            this.opacity = 1;
-            this.trail = [];
-            this.timer = 0;
-            this.delay = 5000 + Math.random() * 15000;
-        }
-        update(dt) {
-            if (!this.active) {
-                this.timer += dt;
-                if (this.timer >= this.delay) {
-                    this.active = true;
-                    this.timer = 0;
-                    this.x = 50 + Math.random() * (w * 0.6);
-                    this.y = Math.random() * h * 0.25;
-                    this.opacity = 1;
-                    this.trail = [];
-                }
-                return;
-            }
-            const dx = Math.cos(this.angle) * this.speed;
-            const dy = Math.sin(this.angle) * this.speed;
-            this.x += dx; this.y += dy;
-            this.trail.push({ x: this.x, y: this.y });
-            if (this.trail.length > 20) this.trail.shift();
-            this.opacity -= 0.015;
-            if (this.opacity <= 0 || this.x > w + 100 || this.y > h + 100) {
-                this.active = false;
-                this.delay = 5000 + Math.random() * 20000;
-                this.timer = 0;
-            }
-        }
-        draw() {
-            if (!this.active) return;
-            for (let i = 1; i < this.trail.length; i++) {
-                const t = this.trail[i];
-                const o = this.opacity * (i / this.trail.length) * 0.2;
-                ctx.beginPath();
-                ctx.arc(t.x, t.y, 1, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(240,236,228,${o})`;
-                ctx.fill();
-            }
-            const gx = this.x - Math.cos(this.angle) * this.len;
-            const gy = this.y - Math.sin(this.angle) * this.len;
-            const grad = ctx.createLinearGradient(this.x, this.y, gx, gy);
-            grad.addColorStop(0, `rgba(240,236,228,${this.opacity})`);
-            grad.addColorStop(0.4, `rgba(240,236,228,${this.opacity * 0.4})`);
-            grad.addColorStop(1, 'rgba(240,236,228,0)');
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(gx, gy);
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(240,236,228,${this.opacity})`;
-            ctx.fill();
-        }
-    }
-
-    const ssCount = safeInt(cfg.shootingStarCount, 1);
-    const shootingStars = Array.from({ length: ssCount }, () => new ShootingStar());
-
-    let lastT = 0;
-    function animate(time) {
-        const dt = lastT ? Math.min(time - lastT, 50) : 16;
-        lastT = time;
-        ctx.clearRect(0, 0, w, h);
-        const bg = ctx.createLinearGradient(0, 0, 0, h);
-        bg.addColorStop(0, '#050510');
-        bg.addColorStop(0.3, '#080818');
-        bg.addColorStop(0.6, '#0a0a1a');
-        bg.addColorStop(0.85, '#0a0a18');
-        bg.addColorStop(1, '#0a0a12');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-        stars.forEach(s => { s.update(time); s.draw(); });
-        drawMoon();
-        clouds.forEach(c => { c.update(); c.draw(); });
-        shootingStars.forEach(ss => { ss.update(dt); ss.draw(); });
-        requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-
-    // =============================================
-    // 3. RELATIONSHIP TIMER
-    // =============================================
-    function parseRelationshipDate() {
-        const dateEl = qs('.hero-timer-date');
-        if (!dateEl) return new Date(2023, 0, 23);
-        const match = dateEl.textContent.match(/(\d{2})\.(\d{2})\.(\d{4})/);
-        if (match) {
-            return new Date(parseInt(match[3], 10), parseInt(match[2], 10) - 1, parseInt(match[1], 10));
-        }
-        return new Date(2023, 0, 23);
-    }
-
-    const relationshipStart = parseRelationshipDate();
-
-    function updateTimers() {
-        const now = new Date();
-        let years = now.getFullYear() - relationshipStart.getFullYear();
-        let months = now.getMonth() - relationshipStart.getMonth();
-        let days = now.getDate() - relationshipStart.getDate();
-        if (days < 0) { months--; const prev = new Date(now.getFullYear(), now.getMonth(), 0); days += prev.getDate(); }
-        if (months < 0) { years--; months += 12; }
-        const pad = n => n.toString().padStart(2, '0');
-        const hh = pad(now.getHours()), mm = pad(now.getMinutes()), ss = pad(now.getSeconds());
-        const ey = $('years'); if (ey) ey.textContent = years;
-        const em = $('months'); if (em) em.textContent = months;
-        const ed = $('days'); if (ed) ed.textContent = days;
-        const eh = $('hours'); if (eh) eh.textContent = hh;
-        const emm = $('minutes'); if (emm) emm.textContent = mm;
-        const es = $('seconds'); if (es) es.textContent = ss;
-    }
-    updateTimers();
-    setInterval(updateTimers, 1000);
-
-    // =============================================
-    // 4. ENVELOPE LOVE LETTER
+    // 7. ENVELOPE LOVE LETTER
     // =============================================
     const envelope = $('envelope');
     const letterBody = $('letterBody');
@@ -407,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (envelopeOpen || typewriterRunning) return;
         envelope.classList.add('open');
         envelopeOpen = true;
-        startTypewriter(letterParagraphs, letterBody, 50);
+        startTypewriter(letterParagraphs, letterBody, 45);
     }
 
     if (envelope) {
@@ -437,50 +329,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (charIdx < text.length) {
                 currentP.textContent += text[charIdx];
                 charIdx++;
-                setTimeout(tick, speed + (Math.random() - 0.5) * 20);
+                setTimeout(tick, speed + (Math.random() - 0.5) * 15);
             } else {
                 paraIdx++; charIdx = 0;
                 if (paraIdx < paragraphs.length) { currentP = document.createElement('p'); container.insertBefore(currentP, cursor); }
-                setTimeout(tick, 500);
+                setTimeout(tick, 400);
             }
         }
-        setTimeout(tick, 600);
+        setTimeout(tick, 500);
     }
 
     // =============================================
-    // 5. EASTER EGG
+    // 8. EASTER EGG MODAL
     // =============================================
-    if (canvas) {
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const cx = e.clientX - rect.left;
-            const cy = e.clientY - rect.top;
-            const dx = cx - moonX, dy = cy - moonY;
-            if (Math.sqrt(dx * dx + dy * dy) < moonRadius * 1.8) {
-                moonClickCount++;
-                if (moonClickCount >= 5) {
-                    moonClickCount = 0;
-                    const em = $('easter-modal');
-                    if (em) em.classList.add('active');
-                }
-            }
-        });
-    }
-
     const easterClose = $('easter-close');
     const easterModal = $('easter-modal');
     if (easterClose) easterClose.addEventListener('click', () => easterModal.classList.remove('active'));
     if (easterModal) easterModal.addEventListener('click', (e) => { if (e.target === easterModal) easterModal.classList.remove('active'); });
 
     // =============================================
-    // 6. PHOTO GALLERY + LIGHTBOX
+    // 9. GALLERY + LIGHTBOX
     // =============================================
     const galleryGrid = $('galleryGrid');
     const lightbox = $('lightbox');
-    const lightboxImg = $('lightbox-img');
-    const lightboxClose = $('lightbox-close');
-    const lightboxPrev = $('lightbox-prev');
-    const lightboxNext = $('lightbox-next');
+    const lightboxImg = $('lightboxImg');
+    const lightboxClose = $('lightboxClose');
+    const lightboxPrev = $('lightboxPrev');
+    const lightboxNext = $('lightboxNext');
     let galleryImages = [];
     let currentImageIndex = 0;
 
@@ -488,20 +363,19 @@ document.addEventListener('DOMContentLoaded', () => {
         return url && url.indexOf('cloudinary') !== -1;
     }
 
+    function cloudinarySrc(url, width) {
+        if (!isCloudinaryUrl(url)) return url;
+        if (!width) return url;
+        return url.replace('/upload/', `/upload/w_${width},f_auto,q_auto/`);
+    }
+
     function cloudinarySrcset(url) {
         if (!isCloudinaryUrl(url)) return '';
-        const base = url.replace('/upload/', '/upload/');
         const widths = [400, 800, 1200];
         return widths.map(w => {
             const src = url.replace('/upload/', `/upload/w_${w/2},f_auto,q_auto/`);
             return `${src} ${w}w`;
         }).join(', ');
-    }
-
-    function cloudinarySrc(url, width) {
-        if (!isCloudinaryUrl(url)) return url;
-        if (!width) return url;
-        return url.replace('/upload/', `/upload/w_${width},f_auto,q_auto/`);
     }
 
     async function loadGallery() {
@@ -520,18 +394,18 @@ document.addEventListener('DOMContentLoaded', () => {
         galleryImages = photos;
         if (photos.length === 0) {
             const frame = document.createElement('div');
-            frame.className = 'gallery-frame reveal empty-frame';
-            frame.innerHTML = '<div class="gallery-placeholder"><span class="placeholder-text">Fotoğraflarını Bekliyor</span></div>';
+            frame.className = 'gallery-frame';
+            frame.innerHTML = '<div class="gallery-placeholder"><span>Fotoğraflarını Bekliyor</span></div>';
             galleryGrid.appendChild(frame);
             return;
         }
         photos.forEach((photo, idx) => {
             const frame = document.createElement('div');
-            frame.className = 'gallery-frame reveal';
+            frame.className = 'gallery-frame';
             const src = photo.cloudinary_url || photo.url;
             const srcset = cloudinarySrcset(src);
             const img = document.createElement('img');
-            img.src = cloudinarySrc(src, 600);
+            img.src = cloudinarySrc(src, 500);
             img.alt = photo.caption || 'Fotoğraf ' + (idx + 1);
             img.loading = 'lazy';
             if (srcset) img.srcset = srcset;
@@ -547,18 +421,16 @@ document.addEventListener('DOMContentLoaded', () => {
         currentImageIndex = idx;
         const photo = galleryImages[idx];
         const src = photo.cloudinary_url || photo.url;
-        lightboxImg.src = cloudinarySrc(src, 1200);
+        lightboxImg.src = cloudinarySrc(src, 1000);
         lightboxImg.srcset = cloudinarySrcset(src);
         lightboxImg.sizes = '85vw';
         lightbox.classList.add('active');
-        document.body.style.overflow = 'hidden';
         updateLightboxNav();
     }
 
     function closeLightbox() {
         if (!lightbox) return;
         lightbox.classList.remove('active');
-        document.body.style.overflow = '';
     }
 
     function prevImage() {
@@ -566,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
         const photo = galleryImages[currentImageIndex];
         const src = photo.cloudinary_url || photo.url;
-        lightboxImg.src = cloudinarySrc(src, 1200);
+        lightboxImg.src = cloudinarySrc(src, 1000);
         lightboxImg.srcset = cloudinarySrcset(src);
     }
 
@@ -575,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
         const photo = galleryImages[currentImageIndex];
         const src = photo.cloudinary_url || photo.url;
-        lightboxImg.src = cloudinarySrc(src, 1200);
+        lightboxImg.src = cloudinarySrc(src, 1000);
         lightboxImg.srcset = cloudinarySrcset(src);
     }
 
@@ -597,42 +469,40 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'ArrowRight') nextImage();
     });
 
+    // Touch swipe for lightbox
+    let touchStartX = 0;
+    if (lightbox) {
+        lightbox.addEventListener('touchstart', e => {
+            touchStartX = e.touches[0].clientX;
+        }, { passive: true });
+        lightbox.addEventListener('touchend', e => {
+            if (!lightbox.classList.contains('active')) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            if (Math.abs(dx) > 50) {
+                if (dx > 0) prevImage();
+                else nextImage();
+            }
+        }, { passive: true });
+    }
+
     loadGallery();
 
     // =============================================
-    // 7. SCROLL REVEAL
+    // 10. SWIPE TO CLOSE DRAWER
     // =============================================
-    const revealEls = qsa('.reveal');
-    const obs = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('active');
-                obs.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.08, rootMargin: '0px 0px -80px 0px' });
-    revealEls.forEach(el => obs.observe(el));
-
-    // =============================================
-    // 8. HERO PARALLAX (very subtle)
-    // =============================================
-    let ticking = false;
-    window.addEventListener('scroll', () => {
-        if (!ticking) {
-            requestAnimationFrame(() => {
-                const sy = window.pageYOffset;
-                const heroSection = document.getElementById('hero');
-                if (heroSection && sy <= heroSection.offsetHeight) {
-                    const content = qs('.hero-content');
-                    if (content) {
-                        const pct = sy / heroSection.offsetHeight;
-                        content.style.transform = `translateY(${pct * 20}px)`;
-                        content.style.opacity = 1 - pct * 0.5;
-                    }
-                }
-                ticking = false;
-            });
-            ticking = true;
+    let drawerTouchX = 0;
+    drawer.addEventListener('touchstart', e => {
+        drawerTouchX = e.touches[0].clientX;
+    }, { passive: true });
+    drawer.addEventListener('touchmove', e => {
+        const dx = e.touches[0].clientX - drawerTouchX;
+        if (dx > 0) {
+            drawer.style.transform = `translateX(${dx}px)`;
         }
-    });
+    }, { passive: true });
+    drawer.addEventListener('touchend', e => {
+        drawer.style.transform = '';
+        const dx = e.changedTouches[0].clientX - drawerTouchX;
+        if (dx > 60) closeDrawer();
+    }, { passive: true });
 });
