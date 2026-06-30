@@ -13,8 +13,8 @@ html, body {
 
 body {
     font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: #090B18;
-    color: #F7E8E8;
+    background: var(--theme-bg, #090B18);
+    color: var(--theme-text, #F7E8E8);
     line-height: 1.6;
     font-weight: 300;
     font-size: 0.95rem;
@@ -31,37 +31,71 @@ h1, h2, h3, h4 {
 .site-bg {
     position: fixed;
     inset: 0;
-    z-index: 0;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    filter: sepia(0.25) saturate(0.7) brightness(0.65) contrast(1.05);
-    transition: filter 2s ease;
+    filter: sepia(0.3) saturate(0.65) brightness(0.6) contrast(1.08) hue-rotate(-5deg);
+    transform: scale(1.02);
+    transition: transform 0.1s ease-out;
+    will-change: transform;
 }
 
-.site-bg::after {
-    content: '';
+.site-bg-lensglow {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        180deg,
-        rgba(9, 11, 24, 0.4) 0%,
-        rgba(9, 11, 24, 0.3) 40%,
-        rgba(9, 11, 24, 0.45) 70%,
-        rgba(9, 11, 24, 0.7) 100%
+    background: radial-gradient(
+        ellipse 60% 40% at 50% 30%,
+        rgba(255, 217, 168, 0.12) 0%,
+        rgba(255, 217, 168, 0.04) 30%,
+        transparent 65%
     );
+    pointer-events: none;
+}
+
+.site-bg-blur {
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 180px 40px rgba(9, 11, 24, 0.25);
+    pointer-events: none;
 }
 
 .site-bg-overlay {
     position: absolute;
     inset: 0;
     background: rgba(9, 11, 24, 0.35);
+    pointer-events: none;
+}
+
+.site-bg-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(9, 11, 24, 0.3) 0%,
+        rgba(9, 11, 24, 0.15) 35%,
+        rgba(9, 11, 24, 0.25) 60%,
+        rgba(9, 11, 24, 0.6) 100%
+    );
+    pointer-events: none;
+}
+
+.site-bg-mist {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse 70% 50% at 50% 60%,
+        rgba(247, 232, 232, 0.02) 0%,
+        rgba(247, 232, 232, 0.01) 40%,
+        transparent 70%
+    );
+    pointer-events: none;
 }
 
 .site-bg-vignette {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at center, transparent 50%, rgba(9, 11, 24, 0.5) 100%);
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(9, 11, 24, 0.7) 100%);
+    pointer-events: none;
 }
 
 /* ========== STARS OVERLAY ========== */
@@ -97,6 +131,7 @@ h1, h2, h3, h4 {
     opacity: 1;
     pointer-events: all;
     transform: scale(1);
+    z-index: 3;
 }
 
 .view::-webkit-scrollbar {
@@ -116,7 +151,7 @@ h1, h2, h3, h4 {
     position: fixed;
     top: 24px;
     right: 24px;
-    z-index: 10001;
+    z-index: 9999;
     width: 40px;
     height: 40px;
     display: flex;

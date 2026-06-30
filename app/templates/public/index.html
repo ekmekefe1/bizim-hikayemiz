@@ -12,7 +12,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Poppins:wght@200;300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css?v=6">
+    <style>
+        :root {
+            --theme-primary: {{ theme_settings.get('theme_primary_color', '#F8C9D4') }};
+            --theme-secondary: {{ theme_settings.get('theme_secondary_color', '#FFD9A8') }};
+            --theme-bg: {{ theme_settings.get('theme_background_color', '#090B18') }};
+            --theme-text: {{ theme_settings.get('theme_text_color', '#F7E8E8') }};
+        }
+    </style>
+    <link rel="stylesheet" href="/static/css/style.css?v=8">
     <noscript>
         <style>
             .view { opacity: 1 !important; transform: none !important; pointer-events: all !important; }
@@ -23,7 +31,11 @@
     <!-- ==================== SITE BACKGROUND ==================== -->
     {% if hero_background_url %}
     <div class="site-bg" style="background-image: url('{{ hero_background_url }}')" aria-hidden="true">
+        <div class="site-bg-lensglow"></div>
+        <div class="site-bg-blur"></div>
         <div class="site-bg-overlay"></div>
+        <div class="site-bg-gradient"></div>
+        <div class="site-bg-mist"></div>
         <div class="site-bg-vignette"></div>
     </div>
     {% endif %}
@@ -44,27 +56,27 @@
         <button class="drawer-close" id="drawerClose" aria-label="Menüyü kapat">&times;</button>
         <nav class="drawer-nav">
             <a href="#counter" class="drawer-link active" data-view="counter">
-                <span class="drawer-link-icon">⌂</span>
+                    <span class="drawer-link-emoji">⌂</span>
                 Ana Sayfa
             </a>
             <a href="#history" class="drawer-link" data-view="history">
-                <span class="drawer-link-icon">⌛</span>
+                    <span class="drawer-link-emoji">⌛</span>
                 Tarihimiz
             </a>
             <a href="#story" class="drawer-link" data-view="story">
-                <span class="drawer-link-icon">♡</span>
+                    <span class="drawer-link-emoji">♡</span>
                 Hikayemiz
             </a>
             <a href="#gallery" class="drawer-link" data-view="gallery">
-                <span class="drawer-link-icon">◻</span>
+                    <span class="drawer-link-emoji">◻</span>
                 Fotoğraflar
             </a>
             <a href="#letter" class="drawer-link" data-view="letter">
-                <span class="drawer-link-icon">✉</span>
+                    <span class="drawer-link-emoji">✉</span>
                 Mektubum
             </a>
             <a href="#future" class="drawer-link" data-view="future">
-                <span class="drawer-link-icon">✦</span>
+                    <span class="drawer-link-emoji">✦</span>
                 Geleceğimiz
             </a>
         </nav>
@@ -262,6 +274,6 @@
             shootingStarCount: {{ anim_settings.get('animation_shooting_star_count', '1') }}
         };
     </script>
-    <script src="/static/js/script.js?v=6"></script>
+    <script src="/static/js/script.js?v=7"></script>
 </body>
 </html>

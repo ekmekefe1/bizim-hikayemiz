@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, DateField, PasswordField, IntegerField, SelectField, BooleanField
+from wtforms import StringField, TextAreaField, DateField, PasswordField, IntegerField
 from wtforms.validators import DataRequired, Length, Optional, NumberRange
 
 class LoginForm(FlaskForm):
@@ -53,9 +53,4 @@ class ThemeSettingsForm(FlaskForm):
 
 class AnimationSettingsForm(FlaskForm):
     animation_star_count = IntegerField('Yıldız Sayısı', validators=[Optional(), NumberRange(min=0, max=10000)])
-    animation_heart_count = IntegerField('Kalp Sayısı', validators=[Optional(), NumberRange(min=0, max=500)])
     animation_shooting_star_count = IntegerField('Kayan Yıldız Sayısı', validators=[Optional(), NumberRange(min=0, max=100)])
-    animation_floating_hearts = IntegerField('Yüzen Kalp Sayısı', validators=[Optional(), NumberRange(min=0, max=200)])
-    animation_floating_roses = IntegerField('Yüzen Gül Sayısı', validators=[Optional(), NumberRange(min=0, max=100)])
-    animation_parallax = SelectField('Parallax Efekti', choices=[('true', 'Açık'), ('false', 'Kapalı')], default='true')
-    animation_scroll_reveal = SelectField('Scroll Reveal', choices=[('true', 'Açık'), ('false', 'Kapalı')], default='true')

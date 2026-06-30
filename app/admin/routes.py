@@ -537,9 +537,7 @@ def settings():
 
         elif 'animation' in request.form:
             if anim_form.validate_on_submit():
-                for field in ['animation_star_count', 'animation_heart_count', 'animation_shooting_star_count',
-                              'animation_floating_hearts', 'animation_floating_roses',
-                              'animation_parallax', 'animation_scroll_reveal']:
+                for field in ['animation_star_count', 'animation_shooting_star_count']:
                     val = getattr(anim_form, field).data
                     if val is not None:
                         Setting.set(field, str(val), 'animation')
@@ -557,10 +555,7 @@ def settings():
     for key, value in anim_settings.items():
         if hasattr(anim_form, key):
             try:
-                if key in ['animation_parallax', 'animation_scroll_reveal']:
-                    getattr(anim_form, key).data = value
-                else:
-                    getattr(anim_form, key).data = int(value) if value else 0
+                getattr(anim_form, key).data = int(value) if value else 0
             except (ValueError, TypeError):
                 getattr(anim_form, key).data = 0
 

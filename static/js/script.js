@@ -216,6 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const relationshipStart = parseRelationshipDate();
 
+    let prevTimerValues = {};
     function updateTimers() {
         const now = new Date();
         let years = now.getFullYear() - relationshipStart.getFullYear();
@@ -225,12 +226,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (months < 0) { years--; months += 12; }
         const pad = n => n.toString().padStart(2, '0');
         const hh = pad(now.getHours()), mm = pad(now.getMinutes()), ss = pad(now.getSeconds());
-        const ey = $('years'); if (ey) ey.textContent = years;
-        const em = $('months'); if (em) em.textContent = months;
-        const ed = $('days'); if (ed) ed.textContent = days;
-        const eh = $('hours'); if (eh) eh.textContent = hh;
-        const emm = $('minutes'); if (emm) emm.textContent = mm;
-        const es = $('seconds'); if (es) es.textContent = ss;
+        const vals = { years, months, days, hours: hh, minutes: mm, seconds: ss };
+        ['years','months','days','hours','minutes','seconds'].forEach(id => {
+            const el = $(id);
+            if (!el) return;
+            const newVal = vals[id];
+            if (prevTimerValues[id] !== undefined && prevTimerValues[id] !== newVal) {
+                el.classList.remove('flip');
+                void el.offsetWidth;
+                el.classList.add('flip');
+            }
+            el.textContent = newVal;
+            prevTimerValues[id] = newVal;
+        });
     }
     updateTimers();
     setInterval(updateTimers, 1000);

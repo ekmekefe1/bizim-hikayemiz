@@ -281,13 +281,8 @@ def _create_default_settings():
         'theme_secondary_color': '#ff6b6b',
         'theme_background_color': '#060612',
         'theme_text_color': '#f0f0f0',
-        'animation_star_count': '1200',
-        'animation_heart_count': '3',
-        'animation_shooting_star_count': '2',
-        'animation_floating_hearts': '3',
-        'animation_floating_roses': '1',
-        'animation_parallax': 'true',
-        'animation_scroll_reveal': 'true',
+        'animation_star_count': '150',
+        'animation_shooting_star_count': '1',
     }
     for key, value in defaults.items():
         if not Setting.query.filter_by(key=key).first():
